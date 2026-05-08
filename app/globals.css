@@ -1,0 +1,562 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: #07111f;
+}
+
+body {
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+  color: #ffffff;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.035em;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07111f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #164e63;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0891b2;
+}
+
+.pdf-rapor-alani {
+  display: none;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: #111827 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ekran-alani {
+    display: none !important;
+  }
+
+  .pdf-rapor-alani {
+    display: block !important;
+    width: 210mm;
+    background: white !important;
+    color: #111827 !important;
+  }
+
+  .pdf-sayfa {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+  padding: 7mm 7mm 36mm 7mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pdf-sayfa:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .pdf-header {
+    display: grid;
+    grid-template-columns: 54mm 1fr;
+    gap: 5mm;
+    align-items: center;
+    border: 1.2px solid #d7e3ea;
+    border-left: 5px solid #36a8bd;
+    border-radius: 8px;
+    padding: 4.5mm;
+  }
+
+  .pdf-logo-alani {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pdf-logo-alani img {
+    width: 46mm;
+    max-height: 18mm;
+    object-fit: contain;
+  }
+
+  .pdf-baslik-alani p {
+    margin: 0;
+    color: #36a8bd;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .pdf-baslik-alani h1 {
+    margin: 1mm 0;
+    color: #16324f;
+    font-size: 20pt;
+    line-height: 1.1;
+  }
+
+  .pdf-baslik-alani span {
+    color: #64748b;
+    font-size: 8.2pt;
+  }
+
+  .pdf-devam-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1.2px solid #c8eef4;
+    border-left: 5px solid #36a8bd;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #eefbfe, #ffffff);
+    padding: 4mm 5mm;
+    margin-bottom: 4mm;
+  }
+
+  .pdf-devam-header p {
+    margin: 0;
+    color: #36a8bd;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+  }
+
+  .pdf-devam-header h1 {
+    margin: 0.8mm 0 0;
+    color: #16324f;
+    font-size: 16pt;
+  }
+
+  .pdf-devam-header span {
+    color: #64748b;
+    font-size: 8pt;
+    font-weight: 700;
+  }
+
+  .pdf-kurum-satiri {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr 1fr;
+    gap: 2mm;
+    margin-top: 3mm;
+    color: #475569;
+    font-size: 6.7pt;
+  }
+
+  .pdf-kurum-satiri span {
+    border-bottom: 1px solid #d7e3ea;
+    padding-bottom: 1.3mm;
+  }
+
+  .pdf-hasta-satiri {
+    display: grid;
+    grid-template-columns: 1.4fr 1.1fr 0.8fr 0.9fr 1fr;
+    gap: 2mm;
+    margin-top: 3.5mm;
+  }
+
+  .pdf-hasta-satiri div {
+    border: 1px solid #d7e3ea;
+    border-radius: 6px;
+    background: #f8fafc;
+    padding: 2mm;
+  }
+
+  .pdf-hasta-satiri span {
+    display: block;
+    color: #64748b;
+    font-size: 6.8pt;
+  }
+
+  .pdf-hasta-satiri strong {
+    display: block;
+    margin-top: 0.8mm;
+    color: #16324f;
+    font-size: 8.2pt;
+  }
+
+  .pdf-tc {
+    letter-spacing: 0.5px;
+    font-size: 8pt !important;
+    white-space: nowrap;
+  }
+
+  .pdf-ozet-satiri {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2mm;
+    margin-top: 3mm;
+  }
+
+  .pdf-ozet-satiri div {
+    border: 1px solid #d7e3ea;
+    border-radius: 6px;
+    padding: 1.7mm;
+    text-align: center;
+  }
+
+  .pdf-ozet-satiri strong {
+    display: block;
+    color: #16324f;
+    font-size: 13pt;
+    line-height: 1;
+  }
+
+  .pdf-ozet-satiri span {
+    display: block;
+    margin-top: 0.8mm;
+    color: #64748b;
+    font-size: 6.8pt;
+  }
+
+  .pdf-genel-degerlendirme,
+  .pdf-one-cikanlar {
+    margin-top: 3.5mm;
+    border: 1px solid #c8eef4;
+    border-radius: 8px;
+    background: #f0fbfd;
+    padding: 3mm;
+  }
+
+  .pdf-genel-degerlendirme h2,
+  .pdf-parametreler h2,
+  .pdf-alt-alan h2,
+  .pdf-one-cikanlar h2 {
+    margin: 0;
+    color: #16324f;
+    font-size: 10pt;
+  }
+
+  .pdf-genel-degerlendirme p,
+  .pdf-one-cikanlar p {
+    margin: 1.4mm 0 0;
+    color: #334155;
+    font-size: 8.2pt;
+    line-height: 1.4;
+  }
+
+  .pdf-one-cikanlar ul {
+    margin: 2mm 0 0;
+    padding-left: 4mm;
+  }
+
+  .pdf-one-cikanlar li {
+    margin: 0 0 1mm;
+    color: #334155;
+    font-size: 7.4pt;
+    line-height: 1.3;
+  }
+
+  .pdf-parametreler {
+    margin-top: 3.5mm;
+    padding-bottom: 8mm;
+  }
+
+  .pdf-serit-liste {
+    margin-top: 2mm;
+    border: 1px solid #d7e3ea;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .pdf-serit-satir {
+    display: grid;
+    grid-template-columns: 27mm 24mm 32mm 19mm 1fr;
+    align-items: stretch;
+    min-height: 9.5mm;
+    border-bottom: 1px solid #d7e3ea;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .pdf-serit-satir:nth-child(odd) {
+    background: #ffffff;
+  }
+
+  .pdf-serit-satir:nth-child(even) {
+    background: #f3f9fc;
+  }
+
+  .pdf-serit-satir:last-child {
+    border-bottom: 0;
+  }
+
+  .pdf-serit-parametre,
+  .pdf-serit-sonuc,
+  .pdf-serit-referans,
+  .pdf-serit-durum,
+  .pdf-serit-yorum {
+    padding: 1.2mm 1.5mm;
+    border-right: 1px solid #d7e3ea;
+  }
+
+  .pdf-serit-yorum {
+    border-right: 0;
+  }
+
+  .pdf-serit-parametre span,
+  .pdf-serit-sonuc span,
+  .pdf-serit-referans span {
+    display: block;
+    color: #64748b;
+    font-size: 5.9pt;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .pdf-serit-parametre strong {
+    display: block;
+    margin-top: 0.7mm;
+    color: #16324f;
+    font-size: 8.2pt;
+    line-height: 1.1;
+  }
+
+  .pdf-serit-sonuc strong,
+  .pdf-serit-referans strong {
+    display: block;
+    margin-top: 0.7mm;
+    color: #111827;
+    font-size: 7.5pt;
+    line-height: 1.15;
+  }
+
+  .pdf-serit-durum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pdf-serit-durum b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16mm;
+    border-radius: 999px;
+    padding: 1mm 2mm;
+    font-size: 6.6pt;
+    white-space: nowrap;
+  }
+
+  .pdf-durum-normal {
+    background: #e8f8ef;
+    color: #087443;
+  }
+
+  .pdf-durum-dusuk {
+    background: #e8f5ff;
+    color: #0369a1;
+  }
+
+  .pdf-durum-yuksek {
+    background: #fff3e6;
+    color: #c25a00;
+  }
+
+  .pdf-durum-kritik {
+    background: #ffecec;
+    color: #b91c1c;
+  }
+
+  .pdf-serit-yorum p {
+    margin: 0;
+    color: #334155;
+    font-size: 7.2pt;
+    line-height: 1.25;
+  }
+
+  .pdf-alt-alan {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2mm;
+    margin-top: 2.5mm;
+    padding-bottom: 16mm;
+  }
+
+  .pdf-alt-alan div {
+    border: 1px solid #d7e3ea;
+    border-radius: 7px;
+    background: #f8fafc;
+    padding: 2mm;
+    min-height: 20mm;
+    max-height: 31mm;
+    overflow: hidden;
+  }
+
+  .pdf-alt-alan h2 {
+    font-size: 9.5pt;
+    margin: 0 0 1mm;
+    color: #16324f;
+  }
+
+  .pdf-alt-alan ul {
+    margin: 0;
+    padding-left: 3.5mm;
+  }
+
+  .pdf-alt-alan li,
+  .pdf-alt-alan p {
+    margin: 0 0 0.6mm;
+    color: #334155;
+    font-size: 6.8pt;
+    line-height: 1.18;
+  }
+
+  .pdf-manuel-notlar {
+    background: #ffffff !important;
+  }
+
+  .pdf-manuel-notlar p {
+    color: #94a3b8;
+    font-size: 7pt;
+    line-height: 1.35;
+    margin-bottom: 1.8mm;
+  }
+
+  .pdf-footer {
+    position: absolute;
+    left: 7mm;
+    right: 7mm;
+    bottom: 6mm;
+    height: 10mm;
+    border-top: 1px solid #d7e3ea;
+    padding-top: 2mm;
+    background: white;
+    text-align: center;
+    color: #64748b;
+    font-size: 6.3pt;
+    z-index: 100;
+  }
+}
+
+.analiz-yukleniyor-kaplama {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top, rgba(54, 168, 189, 0.18), transparent 35%),
+    rgba(7, 17, 31, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.analiz-yukleniyor-kart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid rgba(54, 168, 189, 0.25);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 42px 54px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.analiz-yukleniyor-logo {
+  width: 110px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 22px rgba(54, 168, 189, 0.22));
+}
+
+.daktilo-yazi {
+  width: 320px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #36a8bd;
+  color: #ffffff;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-align: left;
+  animation:
+    daktilo 2s steps(9) infinite alternate,
+    imlec 0.75s step-end infinite;
+}
+
+.analiz-yukleniyor-kart p {
+  margin: 0;
+  color: #b7dbe2;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+@keyframes daktilo {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 320px;
+  }
+}
+
+@keyframes imlec {
+  50% {
+    border-color: transparent;
+  }
+}
+
+.pdf-kategori-blok {
+  margin-top: 2.5mm;
+}
+
+.pdf-kategori-baslik {
+  margin: 0 0 1.2mm;
+  padding: 1.4mm 2mm;
+  border-left: 4px solid #36a8bd;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e8f7fb, #ffffff);
+  color: #16324f;
+  font-size: 8.5pt;
+  font-weight: 800;
+}
