@@ -489,13 +489,33 @@ export default function AnaSayfa() {
                   Kota dolarsa geçici Gemini API anahtarını buraya girerek analize devam edebilirsiniz.
                 </p>
 
-                <input
-                  type="password"
-                  value={geciciApiKey}
-                  onChange={(event) => setGeciciApiKey(event.target.value)}
-                  placeholder="Geçici Gemini API anahtarı"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-300/40"
-                />
+                <div className="flex gap-3">
+                  <input
+                    type="password"
+                    value={geciciApiKey}
+                    onChange={(event) => setGeciciApiKey(event.target.value)}
+                    placeholder="Geçici Gemini API anahtarı"
+                    className="flex-1 rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-300/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!dosya) {
+                        setHata("Lütfen önce bir PDF dosyası seçin.");
+                        return;
+                      }
+                      if (!geciciApiKey.trim()) {
+                        setHata("Lütfen bir API anahtarı girin.");
+                        return;
+                      }
+                      analiziBaslat();
+                    }}
+                    disabled={yukleniyor || !dosya || !geciciApiKey.trim()}
+                    className="rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-3 font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-600 hover:to-cyan-700"
+                  >
+                    {yukleniyor ? "Analiz Ediliyor..." : "Bağlan"}
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
