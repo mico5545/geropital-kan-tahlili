@@ -73,6 +73,18 @@ function durumYazi(durum: string) {
   return "Belirsiz";
 }
 
+function kategoriBasligiGosterilmeliMi(
+  tumParametreler: Parametre[],
+  mevcutIndex: number
+) {
+  if (mevcutIndex === 0) return true;
+
+  const mevcut = tumParametreler[mevcutIndex];
+  const onceki = tumParametreler[mevcutIndex - 1];
+
+  return mevcut.kategori !== onceki.kategori;
+}
+
 function durumPdfSinifi(durum: string) {
   if (durum === "normal") return "pdf-durum-normal";
   if (durum === "dusuk") return "pdf-durum-dusuk";
@@ -854,48 +866,65 @@ export default function AnaSayfa() {
                     : "Laboratuvar Değerleri"}
                 </h2>
 
-{Object.entries(kategorilereGoreGrupla(sayfaParametreleri)).map(
-                  ([kategori, liste]) => (
-                    <div key={`${sayfaIndex}-${kategori}`} className="pdf-kategori-blok">
-                      <h3 className="pdf-kategori-baslik">{kategori}</h3>
+                <div className="pdf-serit-liste">
+                  {sayfaParametreleri.map((item, index) => {
+                    const oncekiSayfalarinToplamElemani =
+                      pdfSayfalari
+                        .slice(0, sayfaIndex)
+                        .reduce((toplam, sayfa) => toplam + sayfa.length, 0);
 
-                      <div className="pdf-serit-liste">
-                        {liste.map((item, index) => (
-                          <div
-                            className="pdf-serit-satir"
-                            key={`${sayfaIndex}-${kategori}-${item.parametre}-${index}`}
-                          >
-                            <div className="pdf-serit-parametre">
-                              <strong>{item.parametre}</strong>
-                            </div>
+                    const globalIndex =
+                      oncekiSayfalarinToplamElemani + index;
 
-                            <div className="pdf-serit-sonuc">
-                              <span>Sonuç</span>
-                              <strong>
-                                {item.deger} {item.birim}
-                              </strong>
-                            </div>
+                    const kategoriBasligiGoster =
+                      kategoriBasligiGosterilmeliMi(
+                        pdfParametreler,
+                        globalIndex
+                      );
 
-                            <div className="pdf-serit-referans">
-                              <span>Referans</span>
-                              <strong>{item.referans || "Belirtilmemiş"}</strong>
-                            </div>
+                    return (
+                      <div
+                        key={`${sayfaIndex}-${item.parametre}-${index}`}
+                      >
+                        {kategoriBasligiGoster && (
+                          <h3 className="pdf-kategori-baslik">
+                            {item.kategori || "Diğer"}
+                          </h3>
+                        )}
 
-                            <div className="pdf-serit-durum">
-                              <b className={durumPdfSinifi(item.durum)}>
-                                {durumYazi(item.durum)}
-                              </b>
-                            </div>
-
-                            <div className="pdf-serit-yorum">
-                              <p>{item.yorum}</p>
-                            </div>
+                        <div className="pdf-serit-satir">
+                          <div className="pdf-serit-parametre">
+                            <strong>{item.parametre}</strong>
                           </div>
-                        ))}
+
+                          <div className="pdf-serit-sonuc">
+                            <span>Sonuç</span>
+                            <strong>
+                              {item.deger} {item.birim}
+                            </strong>
+                          </div>
+
+                          <div className="pdf-serit-referans">
+                            <span>Referans</span>
+                            <strong>
+                              {item.referans || "Belirtilmemiş"}
+                            </strong>
+                          </div>
+
+                          <div className="pdf-serit-durum">
+                            <b className={durumPdfSinifi(item.durum)}>
+                              {durumYazi(item.durum)}
+                            </b>
+                          </div>
+
+                          <div className="pdf-serit-yorum">
+                            <p>{item.yorum}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )
-                )}
+                    );
+                  })}
+                </div>
               </section>
 
               {sayfaIndex === pdfSayfalari.length - 1 && (

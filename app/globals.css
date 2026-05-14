@@ -557,12 +557,13 @@ h3 {
 }
 
 .pdf-kategori-baslik {
-  margin: 0 0 1mm;
-  padding: 1.2mm 2mm;
+  margin: 2.4mm 0 1.1mm;
+  padding: 1.4mm 2.2mm;
   border-left: 4px solid #36a8bd;
   border-radius: 6px;
   background: linear-gradient(90deg, #e8f7fb, #ffffff);
   color: #16324f;
-  font-size: 8.2pt;
+  font-size: 8.3pt;
   font-weight: 800;
+  letter-spacing: 0.2px;
 }
