@@ -292,8 +292,8 @@ export default function AnaSayfa() {
   const pdfSayfalari = useMemo(() => {
     if (pdfParametreler.length === 0) return [];
 
-    const ilkSayfaLimiti = 12;
-    const devamSayfaLimiti = 16;
+    const ilkSayfaLimiti = 15;
+    const devamSayfaLimiti = 19;
 
     const ilkSayfa = pdfParametreler.slice(0, ilkSayfaLimiti);
     const kalanlar = pdfParametreler.slice(ilkSayfaLimiti);
