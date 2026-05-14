@@ -871,36 +871,6 @@ export default function AnaSayfa() {
                       {sonuc.ekNot}
                     </div>
                   </div>
-
-                  <div className="pdf-tahlil-sonucu">
-                    <h2>Tahlil Sonuçları Özeti</h2>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "3mm", marginTop: "2mm" }}>
-                      <div style={{ textAlign: "center", padding: "1.5mm", border: "0.5px solid #d7e3ea", borderRadius: "4px" }}>
-                        <p style={{ margin: "0", fontSize: "7pt", color: "#64748b" }}>Normal</p>
-                        <p style={{ margin: "0.5mm 0 0 0", fontSize: "10pt", fontWeight: "bold", color: "#16a34a" }}>
-                          {sonuc?.ozet?.normalSayisi || 0}
-                        </p>
-                      </div>
-                      <div style={{ textAlign: "center", padding: "1.5mm", border: "0.5px solid #d7e3ea", borderRadius: "4px" }}>
-                        <p style={{ margin: "0", fontSize: "7pt", color: "#64748b" }}>Düşük</p>
-                        <p style={{ margin: "0.5mm 0 0 0", fontSize: "10pt", fontWeight: "bold", color: "#0ea5e9" }}>
-                          {sonuc?.ozet?.dusukSayisi || 0}
-                        </p>
-                      </div>
-                      <div style={{ textAlign: "center", padding: "1.5mm", border: "0.5px solid #d7e3ea", borderRadius: "4px" }}>
-                        <p style={{ margin: "0", fontSize: "7pt", color: "#64748b" }}>Yüksek</p>
-                        <p style={{ margin: "0.5mm 0 0 0", fontSize: "10pt", fontWeight: "bold", color: "#f97316" }}>
-                          {sonuc?.ozet?.yuksekSayisi || 0}
-                        </p>
-                      </div>
-                      <div style={{ textAlign: "center", padding: "1.5mm", border: "0.5px solid #d7e3ea", borderRadius: "4px" }}>
-                        <p style={{ margin: "0", fontSize: "7pt", color: "#64748b" }}>Kritik</p>
-                        <p style={{ margin: "0.5mm 0 0 0", fontSize: "10pt", fontWeight: "bold", color: "#dc2626" }}>
-                          {sonuc?.ozet?.kritikSayisi || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </section>
               )}
 
@@ -910,7 +880,7 @@ export default function AnaSayfa() {
                     Geropital Evde Sağlık ve Bakım Merkezi · Yapay zekâ destekli kurum içi ön değerlendirme raporu
                   </p>
                   <p style={{ margin: "0.3mm 0 0 0" }}>
-                    {sonuc?.hastaBilgisi?.raporTarihi && `Rapor Tarihi: ${sonuc.hastaBilgisi.raporTarihi}`} · Oluşturulan: {new Date().toLocaleDateString("tr-TR")}
+                    Rapor Tarihi: {new Date().toLocaleDateString("tr-TR")}
                   </p>
                 </div>
               </footer>
