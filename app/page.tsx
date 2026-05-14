@@ -169,8 +169,9 @@ export default function AnaSayfa() {
   const [hata, setHata] = useState("");
   const [arama, setArama] = useState("");
   const [durumFiltresi, setDurumFiltresi] = useState<Durum>("tum");
-  const [raporTipi, setRaporTipi] = useState<RaporTipi>("klinik");
   const [geciciApiKey, setGeciciApiKey] = useState("");
+  
+  const raporTipi: RaporTipi = "klinik";
 
   function dosyaSecildi(event: React.ChangeEvent<HTMLInputElement>) {
     const secilenDosya = event.target.files?.[0];
@@ -291,14 +292,14 @@ export default function AnaSayfa() {
   const pdfSayfalari = useMemo(() => {
     if (pdfParametreler.length === 0) return [];
 
-    const ilkSayfaLimiti = raporTipi === "klinik" ? 13 : 10;
-    const devamSayfaLimiti = raporTipi === "klinik" ? 17 : 15;
+    const ilkSayfaLimiti = 12;
+    const devamSayfaLimiti = 16;
 
     const ilkSayfa = pdfParametreler.slice(0, ilkSayfaLimiti);
     const kalanlar = pdfParametreler.slice(ilkSayfaLimiti);
 
     return [ilkSayfa, ...parcalaraAyir(kalanlar, devamSayfaLimiti)];
-  }, [pdfParametreler, raporTipi]);
+  }, [pdfParametreler]);
 
   const kategorilereGoreGrupla = (parametreler: Parametre[]) => {
     const gruplar: Record<string, Parametre[]> = {};
@@ -439,61 +440,6 @@ export default function AnaSayfa() {
             </div>
 
             <div className="space-y-5">
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
-                <h3 className="mb-4 text-lg font-semibold">Rapor Formatı</h3>
-
-                <div className="grid gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setRaporTipi("klinik")}
-                    className={`rounded-2xl border p-5 text-left transition ${
-                      raporTipi === "klinik"
-                        ? "border-cyan-300/50 bg-cyan-400/15"
-                        : "border-white/10 bg-slate-950/40 hover:bg-slate-950/60"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-cyan-100">
-                          Kompakt Klinik Rapor
-                        </p>
-                        <p className="mt-1 text-sm leading-6 text-slate-400">
-                          Tüm değerleri şerit tasarımda gösteren mevcut detaylı rapor.
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200">
-                        Detaylı
-                      </span>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setRaporTipi("ozet")}
-                    className={`rounded-2xl border p-5 text-left transition ${
-                      raporTipi === "ozet"
-                        ? "border-cyan-300/50 bg-cyan-400/15"
-                        : "border-white/10 bg-slate-950/40 hover:bg-slate-950/60"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-cyan-100">
-                          Kurumsal Özet Rapor
-                        </p>
-                        <p className="mt-1 text-sm leading-6 text-slate-400">
-                          Genel değerlendirme ve referans dışı değerleri öne çıkaran
-                          daha sade çıktı.
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200">
-                        Özet
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
               <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
                 <h3 className="mb-3 text-lg font-semibold">API Anahtarı</h3>
 
@@ -823,34 +769,12 @@ export default function AnaSayfa() {
                     <h2>Genel Değerlendirme</h2>
                     <p>{sonuc.genelDegerlendirme}</p>
                   </section>
-
-                  {raporTipi === "ozet" && (
-                    <section className="pdf-one-cikanlar">
-                      <h2>Öne Çıkan Referans Dışı Bulgular</h2>
-                      {referansDisiParametreler.length > 0 ? (
-                        <ul>
-                          {referansDisiParametreler.slice(0, 6).map((item, index) => (
-                            <li key={index}>
-                              <strong>{item.parametre}:</strong> {item.deger}{" "}
-                              {item.birim} · {durumYazi(item.durum)} · {item.yorum}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>Referans dışı belirgin bir değer saptanmamıştır.</p>
-                      )}
-                    </section>
-                  )}
                 </>
               ) : (
                 <header className="pdf-devam-header">
                   <div>
                     <p>Rapor Devamı</p>
-                    <h1>
-                      {raporTipi === "klinik"
-                        ? "Kan Tahlili Değerlendirmesi"
-                        : "Kan Tahlili Kurumsal Özet Raporu"}
-                    </h1>
+                    <h1>Kan Tahlili Değerlendirmesi</h1>
                   </div>
 
                   <span>
@@ -861,9 +785,7 @@ export default function AnaSayfa() {
 
               <section className="pdf-parametreler">
                 <h2>
-                  {raporTipi === "klinik"
-                    ? "Sonuçlar ve Kısa Yorumlar"
-                    : "Laboratuvar Değerleri"}
+                  Sonuçlar ve Kısa Yorumlar
                 </h2>
 
                 <div className="pdf-serit-liste">
@@ -961,7 +883,14 @@ export default function AnaSayfa() {
               )}
 
               <footer className="pdf-footer">
-                Geropital Evde Sağlık ve Bakım Merkezi · Yapay zekâ destekli kurum içi ön değerlendirme raporu
+                <div style={{ fontSize: "6.3pt", textAlign: "center", color: "#64748b" }}>
+                  <p style={{ margin: "0 0 0.3mm 0" }}>
+                    Geropital Evde Sağlık ve Bakım Merkezi · Yapay zekâ destekli kurum içi ön değerlendirme raporu
+                  </p>
+                  <p style={{ margin: "0.3mm 0 0 0" }}>
+                    {sonuc?.hastaBilgisi?.raporTarihi && `Rapor Tarihi: ${sonuc.hastaBilgisi.raporTarihi}`} · Oluşturulan: {new Date().toLocaleDateString("tr-TR")}
+                  </p>
+                </div>
               </footer>
             </div>
           ))}

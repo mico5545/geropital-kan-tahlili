@@ -11,24 +11,28 @@ function jsonTemizle(metin: string) {
 function kategoriBelirle(parametre: string) {
   const p = parametre.toLowerCase();
 
-  if (["wbc", "rbc", "hemoglobin", "hct"].some(k => p.includes(k))) {
+  if (["wbc", "rbc", "hemoglobin", "hct", "plt", "mcv", "mch"].some(k => p.includes(k))) {
     return "Hemogram";
   }
 
-  if (["alt", "ast", "ggt"].some(k => p.includes(k))) {
+  if (["alt", "ast", "ggt", "bilirubin", "alkalen", "albumin"].some(k => p.includes(k))) {
     return "Karaciğer";
   }
 
-  if (["kreatinin", "üre"].some(k => p.includes(k))) {
+  if (["kreatinin", "üre", "bun", "gfr"].some(k => p.includes(k))) {
     return "Böbrek";
   }
 
-  if (["crp", "sedim"].some(k => p.includes(k))) {
+  if (["crp", "sedim", "esr", "hs-crp"].some(k => p.includes(k))) {
     return "Enfeksiyon";
   }
 
   if (["psa", "cea", "ca"].some(k => p.includes(k))) {
     return "Tümör Belirteçleri";
+  }
+
+  if (["vitamin", "b12", "folat", "d3", "d2", "d"].some(k => p.includes(k))) {
+    return "Vitamin Seviyeleri";
   }
 
   return "Genel Biyokimya";
