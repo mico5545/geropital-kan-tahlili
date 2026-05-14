@@ -94,7 +94,11 @@ h3 {
     width: 210mm;
     min-height: 297mm;
     height: 297mm;
-  padding: 7mm 7mm 36mm 7mm;
+    padding: 7mm 7mm 38mm 7mm;
+    background: white;
+    font-family: Arial, Helvetica, sans-serif;
+    page-break-after: always;
+    break-after: page;
     position: relative;
     overflow: hidden;
   }
@@ -295,8 +299,8 @@ h3 {
   }
 
   .pdf-parametreler {
-    margin-top: 3.5mm;
-    padding-bottom: 8mm;
+    margin-top: 3mm;
+    padding-bottom: 12mm;
   }
 
   .pdf-serit-liste {
@@ -465,7 +469,7 @@ h3 {
     left: 7mm;
     right: 7mm;
     bottom: 6mm;
-    height: 10mm;
+    height: 11mm;
     border-top: 1px solid #d7e3ea;
     padding-top: 2mm;
     background: white;
@@ -547,16 +551,18 @@ h3 {
 }
 
 .pdf-kategori-blok {
-  margin-top: 2.5mm;
+  margin-top: 2.2mm;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .pdf-kategori-baslik {
-  margin: 0 0 1.2mm;
-  padding: 1.4mm 2mm;
+  margin: 0 0 1mm;
+  padding: 1.2mm 2mm;
   border-left: 4px solid #36a8bd;
   border-radius: 6px;
   background: linear-gradient(90deg, #e8f7fb, #ffffff);
   color: #16324f;
-  font-size: 8.5pt;
+  font-size: 8.2pt;
   font-weight: 800;
 }

@@ -36,7 +36,8 @@ function kategoriBelirle(parametre: string) {
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const gelenApiKey = request.headers.get("x-gemini-api-key");
+    const apiKey = gelenApiKey || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(

@@ -158,6 +158,7 @@ export default function AnaSayfa() {
   const [arama, setArama] = useState("");
   const [durumFiltresi, setDurumFiltresi] = useState<Durum>("tum");
   const [raporTipi, setRaporTipi] = useState<RaporTipi>("klinik");
+  const [geciciApiKey, setGeciciApiKey] = useState("");
 
   function dosyaSecildi(event: React.ChangeEvent<HTMLInputElement>) {
     const secilenDosya = event.target.files?.[0];
@@ -187,6 +188,11 @@ export default function AnaSayfa() {
 
       const cevap = await fetch("/api/kan-tahlili-analiz", {
         method: "POST",
+        headers: geciciApiKey
+          ? {
+              "x-gemini-api-key": geciciApiKey,
+            }
+          : undefined,
         body: formData,
       });
 
@@ -273,8 +279,8 @@ export default function AnaSayfa() {
   const pdfSayfalari = useMemo(() => {
     if (pdfParametreler.length === 0) return [];
 
-    const ilkSayfaLimiti = raporTipi === "klinik" ? 14 : 11;
-    const devamSayfaLimiti = raporTipi === "klinik" ? 18 : 16;
+    const ilkSayfaLimiti = raporTipi === "klinik" ? 13 : 10;
+    const devamSayfaLimiti = raporTipi === "klinik" ? 17 : 15;
 
     const ilkSayfa = pdfParametreler.slice(0, ilkSayfaLimiti);
     const kalanlar = pdfParametreler.slice(ilkSayfaLimiti);
@@ -474,6 +480,22 @@ export default function AnaSayfa() {
                     </div>
                   </button>
                 </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
+                <h3 className="mb-3 text-lg font-semibold">API Anahtarı</h3>
+
+                <p className="mb-4 text-sm leading-6 text-slate-400">
+                  Kota dolarsa geçici Gemini API anahtarını buraya girerek analize devam edebilirsiniz.
+                </p>
+
+                <input
+                  type="password"
+                  value={geciciApiKey}
+                  onChange={(event) => setGeciciApiKey(event.target.value)}
+                  placeholder="Geçici Gemini API anahtarı"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-300/40"
+                />
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
