@@ -417,11 +417,16 @@ h3 {
   }
 
   .pdf-alt-alan {
+    position: absolute;
+    bottom: 40mm;
+    left: 7mm;
+    right: 7mm;
+    width: calc(100% - 14mm);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2mm;
-    margin-top: 2.5mm;
-    padding-bottom: 16mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .pdf-alt-alan div {
@@ -436,6 +441,7 @@ h3 {
 
   .pdf-alt-alan h2 {
     font-size: 9.5pt;
+    font-weight: 700;
     margin: 0 0 1mm;
     color: #16324f;
   }
@@ -451,17 +457,6 @@ h3 {
     color: #334155;
     font-size: 6.8pt;
     line-height: 1.18;
-  }
-
-  .pdf-manuel-notlar {
-    background: #ffffff !important;
-  }
-
-  .pdf-manuel-notlar p {
-    color: #94a3b8;
-    font-size: 7pt;
-    line-height: 1.35;
-    margin-bottom: 1.8mm;
   }
 
   .pdf-footer {

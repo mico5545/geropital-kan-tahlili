@@ -853,31 +853,23 @@ export default function AnaSayfa() {
                 <section className="pdf-alt-alan">
                   <div>
                     <h2>Değerlendirme</h2>
-                    <ul>
-                      {sonuc.degerlendirmeMaddeleri?.slice(0, 3).map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
-                    </ul>
+                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "20mm", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+                      {listeMetneCevir(sonuc.degerlendirmeMaddeleri).split("\n").map((satir, idx) => satir && <div key={idx} style={{ marginBottom: "0.5mm" }}>• {satir}</div>)}
+                    </div>
                   </div>
 
                   <div>
                     <h2>Tedavi Notları</h2>
-                    <ul>
-                      {sonuc.tedaviNotlari?.slice(0, 3).map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
-                    </ul>
+                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "20mm", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+                      {listeMetneCevir(sonuc.tedaviNotlari).split("\n").map((satir, idx) => satir && <div key={idx} style={{ marginBottom: "0.5mm" }}>• {satir}</div>)}
+                    </div>
                   </div>
 
-                  <div>
-                    <h2>Ek Not</h2>
-                    <p>{sonuc.ekNot}</p>
-                  </div>
-
-                  <div className="pdf-manuel-notlar">
-                    <h2>Manuel Notlar</h2>
-                    <p>........................................................................</p>
-                    <p>........................................................................</p>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <h2 style={{ fontWeight: "800", color: "#16324f", fontSize: "9.5pt", margin: "0 0 1.5mm 0" }}>Ek Not</h2>
+                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "24mm", whiteSpace: "pre-wrap", wordWrap: "break-word", border: "0.5px solid #d7e3ea", borderRadius: "4px", padding: "1.5mm", backgroundColor: "#fafafa" }}>
+                      {sonuc.ekNot}
+                    </div>
                   </div>
 
                   <div className="pdf-tahlil-sonucu">
