@@ -94,7 +94,7 @@ h3 {
     width: 210mm;
     min-height: 297mm;
     height: 297mm;
-    padding: 7mm 7mm 39mm 7mm;
+    padding: 6mm 6mm 38mm 6mm;
     background: white;
     font-family: Arial, Helvetica, sans-serif;
     page-break-after: always;
@@ -111,12 +111,12 @@ h3 {
   .pdf-header {
     display: grid;
     grid-template-columns: 54mm 1fr;
-    gap: 5mm;
+    gap: 4mm;
     align-items: center;
     border: 1.2px solid #d7e3ea;
     border-left: 5px solid #36a8bd;
     border-radius: 8px;
-    padding: 4.5mm;
+    padding: 3.5mm;
   }
 
   .pdf-logo-alani {
@@ -188,8 +188,8 @@ h3 {
   .pdf-kurum-satiri {
     display: grid;
     grid-template-columns: 1.1fr 1.2fr 1fr;
-    gap: 2mm;
-    margin-top: 3mm;
+    gap: 1.5mm;
+    margin-top: 2mm;
     color: #475569;
     font-size: 6.7pt;
   }
@@ -202,8 +202,8 @@ h3 {
   .pdf-hasta-satiri {
     display: grid;
     grid-template-columns: 1.4fr 1.1fr 0.8fr 0.9fr 1fr;
-    gap: 2mm;
-    margin-top: 3.5mm;
+    gap: 1.5mm;
+    margin-top: 2.5mm;
   }
 
   .pdf-hasta-satiri div {
@@ -235,14 +235,14 @@ h3 {
   .pdf-ozet-satiri {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 2mm;
-    margin-top: 3mm;
+    gap: 1.5mm;
+    margin-top: 2.5mm;
   }
 
   .pdf-ozet-satiri div {
     border: 1px solid #d7e3ea;
     border-radius: 6px;
-    padding: 1.7mm;
+    padding: 1.3mm;
     text-align: center;
   }
 
@@ -262,11 +262,11 @@ h3 {
 
   .pdf-genel-degerlendirme,
   .pdf-one-cikanlar {
-    margin-top: 3.5mm;
+    margin-top: 2.5mm;
     border: 1px solid #c8eef4;
     border-radius: 8px;
     background: #f0fbfd;
-    padding: 3mm;
+    padding: 2.5mm;
   }
 
   .pdf-genel-degerlendirme h2,
@@ -299,12 +299,12 @@ h3 {
   }
 
   .pdf-parametreler {
-    margin-top: 3mm;
-    padding-bottom: 12mm;
+    margin-top: 2mm;
+    padding-bottom: 10mm;
   }
 
   .pdf-serit-liste {
-    margin-top: 2mm;
+    margin-top: 1.5mm;
     border: 1px solid #d7e3ea;
     border-radius: 8px;
     overflow: hidden;
@@ -314,7 +314,7 @@ h3 {
     display: grid;
     grid-template-columns: 27mm 24mm 32mm 19mm 1fr;
     align-items: stretch;
-    min-height: 9.5mm;
+    min-height: 8mm;
     border-bottom: 1px solid #d7e3ea;
     page-break-inside: avoid;
     break-inside: avoid;
@@ -337,7 +337,7 @@ h3 {
   .pdf-serit-referans,
   .pdf-serit-durum,
   .pdf-serit-yorum {
-    padding: 1.2mm 1.5mm;
+    padding: 0.9mm 1.2mm;
     border-right: 1px solid #d7e3ea;
   }
 
@@ -350,26 +350,26 @@ h3 {
   .pdf-serit-referans span {
     display: block;
     color: #64748b;
-    font-size: 5.9pt;
-    line-height: 1.1;
+    font-size: 6.1pt;
+    line-height: 1;
     text-transform: uppercase;
   }
 
   .pdf-serit-parametre strong {
     display: block;
-    margin-top: 0.7mm;
+    margin-top: 0.5mm;
     color: #16324f;
-    font-size: 8.2pt;
+    font-size: 7.9pt;
     line-height: 1.1;
   }
 
   .pdf-serit-sonuc strong,
   .pdf-serit-referans strong {
     display: block;
-    margin-top: 0.7mm;
+    margin-top: 0.5mm;
     color: #111827;
-    font-size: 7.5pt;
-    line-height: 1.15;
+    font-size: 7.3pt;
+    line-height: 1.1;
   }
 
   .pdf-serit-durum {
@@ -419,12 +419,12 @@ h3 {
   .pdf-alt-alan {
     position: absolute;
     bottom: 40mm;
-    left: 7mm;
-    right: 7mm;
-    width: calc(100% - 14mm);
+    left: 6mm;
+    right: 6mm;
+    width: calc(100% - 12mm);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2mm;
+    gap: 1.5mm;
     page-break-inside: avoid;
     break-inside: avoid;
   }
