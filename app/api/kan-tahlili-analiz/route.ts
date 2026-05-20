@@ -227,18 +227,30 @@ JSON formatı kesinlikle şöyle olmalı:
       );
     }
 
-    const hamMetin = cevap.text || "";
+    const hamMetin = (cevap.text && typeof cevap.text === "string") ? cevap.text : (cevap.text && typeof cevap.text === "function") ? await cevap.text() : "";
+    if (!hamMetin) {
+      return NextResponse.json(
+        {
+          hata: "Gemini boş yanıt döndürdü.",
+          detay: "Response metni alınamadı.",
+        },
+        { status: 500 }
+      );
+    }
     const temizMetin = jsonTemizle(hamMetin);
 
     let analizSonucu;
 
     try {
       analizSonucu = JSON.parse(temizMetin);
-    } catch {
+    } catch (parseError: any) {
+      console.error("JSON Parse Hatası:", parseError.message);
+      console.error("Temiz Metin:", temizMetin.substring(0, 500));
+      
       return NextResponse.json(
         {
           hata: "Gemini sonucu JSON formatında döndüremedi.",
-          detay: temizMetin,
+          detay: `Parse Hatası: ${parseError.message}. Ham Metin (İlk 200 char): ${temizMetin.substring(0, 200)}`,
         },
         { status: 500 }
       );

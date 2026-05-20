@@ -266,7 +266,17 @@ export default function AnaSayfa() {
         body: formData,
       });
 
-      const veri = await cevap.json();
+      let veri;
+      try {
+        veri = await cevap.json();
+      } catch (parseError: any) {
+        const responseText = await cevap.text();
+        console.error("JSON Parse Hatası:", parseError.message);
+        console.error("Response Metni:", responseText);
+        throw new Error(
+          `JSON Parse Hatası: ${parseError.message}. Response: ${responseText.substring(0, 200)}`
+        );
+      }
 
       if (!cevap.ok) {
         throw new Error(
