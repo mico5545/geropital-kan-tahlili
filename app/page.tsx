@@ -508,18 +508,18 @@ export default function AnaSayfa() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (!dosya) {
-                        setHata("Lütfen önce bir PDF dosyası seçin.");
-                        return;
-                      }
                       if (!geciciApiKey.trim()) {
                         setHata("Lütfen bir API anahtarı girin.");
+                        return;
+                      }
+                      if (!dosya) {
+                        setHata("Lütfen bir PDF dosyası seçin.");
                         return;
                       }
                       setIsUpdatingApiKey(true);
                       analiziBaslat();
                     }}
-                    disabled={yukleniyor || isUpdatingApiKey || !dosya || !geciciApiKey.trim()}
+                    disabled={yukleniyor || isUpdatingApiKey || !geciciApiKey.trim()}
                     className="rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-3 font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-600 hover:to-cyan-700"
                   >
                     {isUpdatingApiKey ? "Güncelleniyor..." : yukleniyor ? "Analiz Ediliyor..." : "Bağlan"}
