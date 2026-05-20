@@ -567,3 +567,65 @@ h3 {
   page-break-inside: avoid;
   break-inside: avoid;
 }
+
+@media print {
+  .pdf-klinik-notlar-sayfasi {
+    padding-bottom: 24mm !important;
+  }
+
+  .pdf-not-hero {
+    margin-top: 5mm;
+    border: 1px solid #c8eef4;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f0fbfd, #ffffff);
+    padding: 5mm;
+  }
+
+  .pdf-not-hero h2 {
+    margin: 0;
+    color: #16324f;
+    font-size: 14pt;
+    font-weight: 800;
+  }
+
+  .pdf-not-hero p {
+    margin: 2mm 0 0;
+    color: #334155;
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+
+  .pdf-alt-alan-premium {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4mm;
+    margin-top: 6mm;
+    padding-bottom: 0;
+  }
+
+  .pdf-alt-alan-premium div {
+    min-height: 50mm;
+    max-height: none;
+    overflow: visible;
+    border-radius: 12px;
+    padding: 5mm;
+    background: #f8fafc;
+  }
+
+  .pdf-alt-alan-premium h2 {
+    font-size: 13pt;
+    margin-bottom: 3mm;
+  }
+
+  .pdf-alt-alan-premium li,
+  .pdf-alt-alan-premium p {
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+
+  .pdf-manuel-notlar p {
+    font-size: 9pt;
+    line-height: 2.1;
+    color: #94a3b8;
+  }
+}

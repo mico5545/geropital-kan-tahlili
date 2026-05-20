@@ -114,6 +114,62 @@ function parcalaraAyir<T>(liste: T[], parcaBoyutu: number) {
   return parcalar;
 }
 
+function parametreYukseklikPuani(item: Parametre) {
+  let puan = 1;
+
+  if ((item.yorum || "").length > 80) puan += 0.5;
+  if ((item.yorum || "").length > 140) puan += 0.5;
+  if ((item.parametre || "").length > 22) puan += 0.5;
+  if ((item.referans || "").length > 20) puan += 0.5;
+
+  return puan;
+}
+
+function akilliPdfSayfalariOlustur(
+  parametreler: Parametre[],
+  raporTipi: RaporTipi
+) {
+  const sayfalar: Parametre[][] = [];
+
+  const ilkSayfaLimit = raporTipi === "klinik" ? 13 : 10;
+  const devamSayfaLimit = raporTipi === "klinik" ? 18 : 15;
+
+  let aktifSayfa: Parametre[] = [];
+  let aktifPuan = 0;
+  let sayfaIndex = 0;
+  let oncekiKategori = "";
+
+  parametreler.forEach((item) => {
+    const kategori = item.kategori || "Diger";
+    const kategoriDegisti = kategori !== oncekiKategori;
+
+    let satirPuani = parametreYukseklikPuani(item);
+
+    if (kategoriDegisti) {
+      satirPuani += 0.8;
+    }
+
+    const limit = sayfaIndex === 0 ? ilkSayfaLimit : devamSayfaLimit;
+
+    if (aktifPuan + satirPuani > limit && aktifSayfa.length > 0) {
+      sayfalar.push(aktifSayfa);
+      aktifSayfa = [];
+      aktifPuan = 0;
+      sayfaIndex++;
+    }
+
+    aktifSayfa.push(item);
+    aktifPuan += satirPuani;
+    oncekiKategori = kategori;
+  });
+
+  if (aktifSayfa.length > 0) {
+    sayfalar.push(aktifSayfa);
+  }
+
+  return sayfalar;
+}
+
 function dosyaAdiTemizle(metin: string) {
   return metin
     .replace(/[ğ]/g, "g")
@@ -170,6 +226,7 @@ export default function AnaSayfa() {
   const [arama, setArama] = useState("");
   const [durumFiltresi, setDurumFiltresi] = useState<Durum>("tum");
   const [geciciApiKey, setGeciciApiKey] = useState("");
+  const [isUpdatingApiKey, setIsUpdatingApiKey] = useState(false);
   
   const raporTipi: RaporTipi = "klinik";
 
@@ -224,6 +281,7 @@ export default function AnaSayfa() {
       setHata(error.message || "Beklenmeyen bir hata oluştu.");
     } finally {
       setYukleniyor(false);
+      setIsUpdatingApiKey(false);
     }
   }
 
@@ -290,16 +348,8 @@ export default function AnaSayfa() {
   }, [sonuc]);
 
   const pdfSayfalari = useMemo(() => {
-    if (pdfParametreler.length === 0) return [];
-
-    const ilkSayfaLimiti = 15;
-    const devamSayfaLimiti = 19;
-
-    const ilkSayfa = pdfParametreler.slice(0, ilkSayfaLimiti);
-    const kalanlar = pdfParametreler.slice(ilkSayfaLimiti);
-
-    return [ilkSayfa, ...parcalaraAyir(kalanlar, devamSayfaLimiti)];
-  }, [pdfParametreler]);
+    return akilliPdfSayfalariOlustur(pdfParametreler, raporTipi);
+  }, [pdfParametreler, raporTipi]);
 
   const kategorilereGoreGrupla = (parametreler: Parametre[]) => {
     const gruplar: Record<string, Parametre[]> = {};
@@ -323,7 +373,7 @@ export default function AnaSayfa() {
 
   return (
     <main className="min-h-screen bg-[#07111f] text-white">
-      {yukleniyor && (
+      {(yukleniyor || isUpdatingApiKey) && (
         <div className="analiz-yukleniyor-kaplama">
           <div className="analiz-yukleniyor-kart">
             <img
@@ -337,7 +387,7 @@ export default function AnaSayfa() {
             </div>
 
             <p>
-              Kan tahlili analiz ediliyor...
+              {isUpdatingApiKey ? "API Anahtarı Güncelleniyor..." : "Kan tahlili analiz ediliyor..."}
             </p>
           </div>
         </div>
@@ -466,12 +516,13 @@ export default function AnaSayfa() {
                         setHata("Lütfen bir API anahtarı girin.");
                         return;
                       }
+                      setIsUpdatingApiKey(true);
                       analiziBaslat();
                     }}
-                    disabled={yukleniyor || !dosya || !geciciApiKey.trim()}
+                    disabled={yukleniyor || isUpdatingApiKey || !dosya || !geciciApiKey.trim()}
                     className="rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-3 font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-600 hover:to-cyan-700"
                   >
-                    {yukleniyor ? "Analiz Ediliyor..." : "Bağlan"}
+                    {isUpdatingApiKey ? "Güncelleniyor..." : yukleniyor ? "Analiz Ediliyor..." : "Bağlan"}
                   </button>
                 </div>
               </div>
@@ -849,30 +900,6 @@ export default function AnaSayfa() {
                 </div>
               </section>
 
-              {sayfaIndex === pdfSayfalari.length - 1 && (
-                <section className="pdf-alt-alan">
-                  <div>
-                    <h2>Değerlendirme</h2>
-                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "20mm", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-                      {listeMetneCevir(sonuc.degerlendirmeMaddeleri).split("\n").map((satir, idx) => satir && <div key={idx} style={{ marginBottom: "0.5mm" }}>• {satir}</div>)}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h2>Tedavi Notları</h2>
-                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "20mm", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-                      {listeMetneCevir(sonuc.tedaviNotlari).split("\n").map((satir, idx) => satir && <div key={idx} style={{ marginBottom: "0.5mm" }}>• {satir}</div>)}
-                    </div>
-                  </div>
-
-                  <div style={{ gridColumn: "1 / -1" }}>
-                    <h2 style={{ fontWeight: "800", color: "#16324f", fontSize: "9.5pt", margin: "0 0 1.5mm 0" }}>Ek Not</h2>
-                    <div style={{ fontSize: "6.8pt", lineHeight: "1.4", color: "#334155", minHeight: "24mm", whiteSpace: "pre-wrap", wordWrap: "break-word", border: "0.5px solid #d7e3ea", borderRadius: "4px", padding: "1.5mm", backgroundColor: "#fafafa" }}>
-                      {sonuc.ekNot}
-                    </div>
-                  </div>
-                </section>
-              )}
 
               <footer className="pdf-footer">
                 <div style={{ fontSize: "6.3pt", textAlign: "center", color: "#64748b" }}>
@@ -886,6 +913,64 @@ export default function AnaSayfa() {
               </footer>
             </div>
           ))}
+
+          {sonuc && (
+            <div className="pdf-sayfa pdf-klinik-notlar-sayfasi">
+              <header className="pdf-devam-header">
+                <div>
+                  <p>Klinik Notlar</p>
+                  <h1>Degerlendirme ve Tedavi Notlari</h1>
+                </div>
+                <span>Son Sayfa</span>
+              </header>
+
+              <section className="pdf-not-hero">
+                <h2>Rapor Sonu Klinik Degerlendirme</h2>
+                <p>
+                  Bu bolum, kan tahlili sonuclarinin genel klinik yorumu, takip
+                  plani, tedavi notlari ve manuel not alani icin hazirlanmistir.
+                </p>
+              </section>
+
+              <section className="pdf-alt-alan pdf-alt-alan-premium">
+                <div>
+                  <h2>Degerlendirme</h2>
+                  <ul>
+                    {sonuc.degerlendirmeMaddeleri?.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h2>Tedavi Notlari</h2>
+                  <ul>
+                    {sonuc.tedaviNotlari?.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h2>Ek Not</h2>
+                  <p>{sonuc.ekNot}</p>
+                </div>
+
+                <div className="pdf-manuel-notlar">
+                  <h2>Manuel Notlar</h2>
+                  <p>........................................................................</p>
+                  <p>........................................................................</p>
+                  <p>........................................................................</p>
+                  <p>........................................................................</p>
+                  <p>........................................................................</p>
+                </div>
+              </section>
+
+              <footer className="pdf-footer">
+                Geropital Evde Saglik ve Bakim Merkezi · Yapay zeka destekli kurum ici on degerlendirme raporu
+              </footer>
+            </div>
+          )}
         </section>
       )}
     </main>
