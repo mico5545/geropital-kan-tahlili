@@ -279,11 +279,16 @@ export default function AnaSayfa() {
       }
 
       if (!cevap.ok) {
-        throw new Error(
-          veri.detay
-            ? `${veri.hata} Detay: ${veri.detay}`
-            : veri.hata || "Analiz sırasında bir hata oluştu."
-        );
+        let hataMesaji = veri.hata || "Analiz sırasında bir hata oluştu.";
+        
+        // Quota hatası için özel mesaj
+        if (cevap.status === 429 && veri.onerilen) {
+          hataMesaji = `${hataMesaji}\n\n${veri.detay}\n\n✓ ${veri.onerilen}`;
+        } else if (veri.detay) {
+          hataMesaji = `${hataMesaji} Detay: ${veri.detay}`;
+        }
+        
+        throw new Error(hataMesaji);
       }
 
       setSonuc(veri);
@@ -492,7 +497,7 @@ export default function AnaSayfa() {
                 )}
 
                 {hata && (
-                  <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-red-300/20 bg-red-500/10 p-4 text-left text-sm text-red-200">
+                  <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-red-300/20 bg-red-500/10 p-4 text-left text-sm text-red-200 whitespace-pre-wrap">
                     {hata}
                   </div>
                 )}

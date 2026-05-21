@@ -359,12 +359,28 @@ analizSonucu.hastaBilgisi = {
   } catch (error: any) {
     console.error("KAN TAHLİLİ ANALİZ GERÇEK HATA:", error);
 
+    const errorMessage = error?.message || String(error);
+    const errorStatus = error?.status || 500;
+
+    // Quota hatası
+    if (errorStatus === 429 || errorMessage.includes("quota") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+      return NextResponse.json(
+        {
+          hata: "API Quota Hatası: Günlük limit aşıldı.",
+          detay: "Sistem şu anda yoğun kullanımdadır. Lütfen birkaç saat sonra tekrar deneyin veya 'API Anahtarı' bölümünden kendi Gemini API anahtarınızı girerek devam edebilirsiniz.",
+          onerilen: "Kendi Gemini API anahtarınız varsa, 'API Anahtarı' kısmına yapıştırıp 'Bağlan' butonuna tıklayın.",
+        },
+        { status: 429 }
+      );
+    }
+
+    // Genel hata
     return NextResponse.json(
       {
         hata: "Analiz sırasında hata oluştu.",
-        detay: error?.message || String(error),
+        detay: errorMessage,
       },
-      { status: 500 }
+      { status: errorStatus > 599 ? 500 : errorStatus }
     );
   }
 }
