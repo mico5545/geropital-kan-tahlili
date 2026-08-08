@@ -307,7 +307,6 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   notKutu: {
-    flex: 1,
     borderRadius: 8,
     backgroundColor: RENK.griArkaplan,
     padding: 11,
@@ -658,11 +657,12 @@ export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
 
         {/* ============ KLİNİK NOTLAR - AYRI SAYFA ============ */}
         <View break>
-          <Text style={styles.kategoriSayfaBaslikMetin}>
-            Değerlendirme ve Tedavi Notları
+          <Text style={styles.bolumBasligi}>Değerlendirme ve Tedavi Notları</Text>
+          <Text style={styles.bolumAltBasligi}>
+            Klinik takip planı, tedavi notları ve uyarılar
           </Text>
 
-          <View style={[styles.notBaslikKutu, { marginTop: 10 }]} wrap={false}>
+          <View style={[styles.notBaslikKutu, { marginTop: 8 }]} wrap={false}>
             <Text style={styles.h2}>Rapor Sonu Klinik Değerlendirme</Text>
             <Text style={styles.paragraf}>
               Bu bölüm, kan tahlili sonuçlarının takip planı, tedavi notları
@@ -670,8 +670,8 @@ export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
             </Text>
           </View>
 
-          <View style={[styles.notKutu, { marginTop: 12, marginRight: 0 }]} wrap={false}>
-            <Text style={styles.h2}>Tedavi ve Takip Notları</Text>
+          <View style={[styles.notKutu, { marginTop: 12 }]} wrap={false}>
+            <Text style={[styles.h2, { marginBottom: 6 }]}>Tedavi ve Takip Notları</Text>
             {(sonuc.tedaviNotlari || []).map((madde, index) => (
               <Text key={index} style={styles.notMadde}>
                 • {madde}
@@ -680,10 +680,10 @@ export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
           </View>
 
           <View
-            style={[styles.notKutu, { marginTop: 9, marginRight: 0, backgroundColor: "#fffbeb" }]}
+            style={[styles.notKutu, { marginTop: 12, backgroundColor: "#fffbeb" }]}
             wrap={false}
           >
-            <Text style={styles.h2}>Uyarı</Text>
+            <Text style={[styles.h2, { marginBottom: 6 }]}>Uyarı</Text>
             <Text style={styles.notMadde}>{sonuc.uyariMesaji}</Text>
           </View>
 
