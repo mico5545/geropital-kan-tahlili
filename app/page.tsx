@@ -71,12 +71,15 @@ function DnaSeridi({
   renk2: string;
   sure: number;
 }) {
-  const kopyaSayisi = 7;
+  const kopyaSayisi = 9;
 
   return (
     <div
       className={ters ? "dna-serit-yukari" : "dna-serit-asagi"}
-      style={{ animationDuration: `${sure}s` }}
+      style={{
+        animationDuration: `${sure}s, 6s`,
+        animationDelay: `0s, ${(sure % 5)}s`,
+      }}
     >
       {Array.from({ length: kopyaSayisi }).map((_, i) => (
         <svg
@@ -111,44 +114,88 @@ function DnaSeridi({
   );
 }
 
-// Marka rengi (turkuaz) etrafında toplanan, birbiriyle uyumlu, SOLUK bir
-// renk ailesi. Önceki sürümdeki 8 parlak/doygun renk metinle okunabilirlik
-// açısından yarışıyordu; burada aynı renk hissi korunuyor ama parlaklık
-// ve doygunluk düşürüldü (pastel ton), sütun sayısı da azaltıldı.
+// Marka rengi TURKUAZ/TEAL ailesi. Önceki palette mor/indigo gibi marka
+// dışı neon tonlar vardı; burada hepsi turkuaz-camgöbeği-teal skalasında,
+// birbirinden ince tonlarla ayrılıyor - kurumsal ve tutarlı bir his.
 const DNA_RENK_PALETI: [string, string][] = [
-  ["#67e8f9", "#38bdf8"], // camgöbeği - mavi (marka rengi)
-  ["#a5b4fc", "#93c5fd"], // indigo - açık mavi
-  ["#5eead4", "#2dd4bf"], // turkuaz
-  ["#c4b5fd", "#a78bfa"], // açık mor
-  ["#7dd3fc", "#67e8f9"], // gökyüzü - camgöbeği
+  ["#5eead4", "#2dd4bf"], // açık turkuaz - turkuaz
+  ["#67e8f9", "#22d3ee"], // camgöbeği
+  ["#2dd4bf", "#14b8a6"], // teal
+  ["#7dd3fc", "#38bdf8"], // gökyüzü mavisi (marka aksanı)
+  ["#5eead4", "#0d9488"], // turkuaz - koyu teal
+  ["#22d3ee", "#0891b2"], // camgöbeği - koyu
+  ["#99f6e4", "#5eead4"], // çok açık turkuaz
+  ["#38bdf8", "#0ea5e9"], // mavi aksan
 ];
 
-// Artık sadece kenarlarda değil, tüm sayfa genişliğine yayılmış, ama
-// GÖZ YORMAYACAK kadar soluk, dekoratif bir arka plan. z-0 + main'in
-// "relative" olması sayesinde main'in arka plan renginin ÜSTÜNDE, gerçek
-// içeriğin ALTINDA katmanlanır. `aktif=false` iken (örn. analiz sürerken,
-// ağır bir blur efektli yükleniyor ekranı zaten açıkken) hiç render
-// edilmez - iki ağır efekt aynı anda çalışıp tarayıcıyı zorlamasın diye.
+// Tüm sayfa genişliğine yayılmış, SIK dizilmiş, göz yormayacak kadar soluk
+// dekoratif bir DNA arka planı. `aktif=false` iken (analiz sürerken)
+// render edilmez - iki ağır efekt aynı anda tarayıcıyı zorlamasın diye.
 function DnaArkaplan({ aktif }: { aktif: boolean }) {
   if (!aktif) return null;
 
   return (
-    <div
-      aria-hidden
-      className="dna-arkaplan pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-[0.13]"
-    >
-      <div className="grid h-full grid-flow-col auto-cols-fr gap-5 px-2 sm:gap-8 lg:gap-10">
-        {DNA_RENK_PALETI.map(([renk1, renk2], i) => (
-          <DnaSeridi
-            key={i}
-            renk1={renk1}
-            renk2={renk2}
-            ters={i % 2 === 1}
-            sure={36 + (i % 3) * 8}
-          />
-        ))}
+    <>
+      {/* İnce blueprint ızgarası - yalnızca koyu temada, laboratuvar hissi */}
+      <div className="lab-izgara pointer-events-none fixed inset-0 z-0 hidden dark:block" />
+
+      {/* Yükselen kabarcıklar - yalnızca koyu temada */}
+      <div className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden opacity-70 dark:block">
+        <LabKabarciklari />
       </div>
-    </div>
+
+      {/* DNA sarmalları */}
+      <div
+        aria-hidden
+        className="dna-arkaplan pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-[0.16]"
+      >
+        <div className="grid h-full grid-flow-col auto-cols-fr gap-2 px-1 sm:gap-3 lg:gap-4">
+          {DNA_RENK_PALETI.map(([renk1, renk2], i) => (
+            <DnaSeridi
+              key={i}
+              renk1={renk1}
+              renk2={renk2}
+              ters={i % 2 === 1}
+              sure={30 + (i % 4) * 6}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Laboratuvar atmosferi: dipten yüzeye yavaşça yükselen, farklı boyut ve
+// hızlarda kabarcıklar. Tıpkı bir numune tüpü / kültür ortamı gibi. Salt
+// dekoratif, düşük opaklıkta, içerikle çakışmaz.
+function LabKabarciklari() {
+  const kabarciklar = [
+    { sol: "8%", boyut: 26, sure: 15, gecikme: 0 },
+    { sol: "18%", boyut: 14, sure: 12, gecikme: 3 },
+    { sol: "30%", boyut: 34, sure: 19, gecikme: 6 },
+    { sol: "44%", boyut: 18, sure: 14, gecikme: 1 },
+    { sol: "57%", boyut: 24, sure: 17, gecikme: 4 },
+    { sol: "68%", boyut: 12, sure: 11, gecikme: 7 },
+    { sol: "79%", boyut: 30, sure: 20, gecikme: 2 },
+    { sol: "90%", boyut: 16, sure: 13, gecikme: 5 },
+  ];
+
+  return (
+    <>
+      {kabarciklar.map((k, i) => (
+        <span
+          key={i}
+          className="kabarcik"
+          style={{
+            left: k.sol,
+            width: k.boyut,
+            height: k.boyut,
+            animationDuration: `${k.sure}s`,
+            animationDelay: `${k.gecikme}s`,
+          }}
+        />
+      ))}
+    </>
   );
 }
 
@@ -558,7 +605,7 @@ export default function AnaSayfa() {
   const kritikVarMi = (sonuc?.ozet?.kritikSayisi || 0) > 0;
 
   return (
-    <main className="relative min-h-screen bg-slate-50 dark:bg-[#07111f] text-slate-900 dark:text-white">
+    <main className="relative min-h-screen bg-slate-50 dark:bg-[#06131a] text-slate-900 dark:text-white">
       <DnaArkaplan aktif={!yukleniyor && !isUpdatingApiKey} />
       {(yukleniyor || isUpdatingApiKey) && (
         <div className="analiz-yukleniyor-kaplama">
@@ -598,7 +645,7 @@ export default function AnaSayfa() {
       )}
 
       <section className={`relative z-10 overflow-hidden px-6 py-10 ${sonuc ? "pb-24 lg:pb-10" : ""}`}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#1e3a8a55,transparent_35%),radial-gradient(circle_at_bottom_left,#0ea5e955,transparent_30%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0d7a8c33,transparent_38%),radial-gradient(circle_at_bottom_left,#0a5f6e2e,transparent_34%)]" />
 
         <div className="relative mx-auto max-w-7xl">
           <header className="mb-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">

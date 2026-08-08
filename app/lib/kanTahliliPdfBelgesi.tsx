@@ -211,12 +211,26 @@ const styles = StyleSheet.create({
   },
 
   // --- Kategori sayfası başlığı ---
+  kategoriBlok: {
+    marginBottom: 16,
+  },
+  bolumBasligi: {
+    color: RENK.lacivert,
+    fontSize: 18,
+    fontWeight: 700,
+  },
+  bolumAltBasligi: {
+    color: RENK.gri,
+    fontSize: 9,
+    marginTop: 3,
+    marginBottom: 6,
+  },
   kategoriSayfaBaslik: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 14,
-    marginBottom: 12,
-    paddingBottom: 10,
+    marginTop: 6,
+    marginBottom: 10,
+    paddingBottom: 9,
     borderBottomWidth: 2,
     borderBottomColor: RENK.griBorder,
   },
@@ -589,35 +603,58 @@ export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
           </Text>
         ) : null}
 
-        {/* ============ HER KATEGORİ KENDİ SAYFASINDA ============ */}
-        {/* Kullanıcı geri bildirimiyle netleşti: birden fazla kategori
-            aynı sayfayı paylaşınca görsel olarak karışık/iç içe geçmiş
-            görünüyordu. Bu yüzden her kategori "break" ile kesin olarak
-            yeni bir sayfadan başlıyor - küçük gruplarda sayfa altında bir
-            miktar boşluk kalması, resmi bir laboratuvar raporunda normal
-            ve kabul edilebilir bir tasarım tercihidir. */}
-        {gruplar.map((grup) => (
-          <View key={grup.kategori} break>
-            <View style={styles.kategoriSayfaBaslik}>
-              <KategoriIkonu kategori={grup.kategori} />
-              <View>
-                <Text style={styles.kategoriSayfaBaslikMetin}>{grup.kategori}</Text>
-                <Text style={styles.kategoriSayfaAltMetin}>
-                  {grup.parametreler.length} parametre · Sonuçlar ve kısa yorumlar
-                </Text>
-              </View>
-            </View>
+        {/* Kategori bölümü kapaktan sonra yeni sayfada, tek bir başlıkla
+            temiz başlar; sonra gruplar akış halinde dizilir. */}
+        <View break>
+          <Text style={styles.bolumBasligi}>Laboratuvar Bulguları</Text>
+          <Text style={styles.bolumAltBasligi}>
+            Sonuçlar kan gruplarına göre sınıflandırılmıştır
+          </Text>
+        </View>
 
-            {grup.parametreler.map((item, index) => (
-              <ParametreSatiri
-                key={`${grup.kategori}-${item.parametre}-${index}`}
-                item={item}
-                index={index}
-                toplamSatir={grup.parametreler.length}
-              />
-            ))}
-          </View>
-        ))}
+        {/* ============ KATEGORİLER - SIRAYLA, AKIŞ HALİNDE ============ */}
+        {/* Gruplar sırayla dizilir. Her kategori başlığı, altındaki ilk
+            satırla birlikte "bölünmez" bir blok (wrap={false}) olarak
+            tutulur - böylece başlık bir sayfada, satırları başka sayfada
+            kalıp "bindirme/karışma" hissi vermez. Grup büyükse kalan
+            satırlar doğal akışla devam eder; küçük gruplar aynı sayfada
+            alt alta dizilerek gereksiz boşluk bırakmaz. */}
+        {gruplar.map((grup) => {
+          const [ilkSatir, ...digerSatirlar] = grup.parametreler;
+
+          return (
+            <View key={grup.kategori} style={styles.kategoriBlok}>
+              <View wrap={false}>
+                <View style={styles.kategoriSayfaBaslik}>
+                  <KategoriIkonu kategori={grup.kategori} />
+                  <View>
+                    <Text style={styles.kategoriSayfaBaslikMetin}>{grup.kategori}</Text>
+                    <Text style={styles.kategoriSayfaAltMetin}>
+                      {grup.parametreler.length} parametre · Sonuçlar ve kısa yorumlar
+                    </Text>
+                  </View>
+                </View>
+
+                {ilkSatir && (
+                  <ParametreSatiri
+                    item={ilkSatir}
+                    index={0}
+                    toplamSatir={grup.parametreler.length}
+                  />
+                )}
+              </View>
+
+              {digerSatirlar.map((item, index) => (
+                <ParametreSatiri
+                  key={`${grup.kategori}-${item.parametre}-${index + 1}`}
+                  item={item}
+                  index={index + 1}
+                  toplamSatir={grup.parametreler.length}
+                />
+              ))}
+            </View>
+          );
+        })}
 
         {/* ============ KLİNİK NOTLAR - AYRI SAYFA ============ */}
         <View break>

@@ -168,11 +168,70 @@ h3 {
 }
 
 .dna-serit-asagi {
-  animation: dna-akis-asagi 28s linear infinite;
+  animation-name: dna-akis-asagi, dna-parla;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
 }
 
 .dna-serit-yukari {
-  animation: dna-akis-yukari 34s linear infinite;
+  animation-name: dna-akis-yukari, dna-parla;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+/* DNA sarmalının kendi içinde hafifçe "parlayıp sönmesi" - kaymanın
+   üzerine binen ikinci bir katman, daha canlı/organik bir his verir. */
+@keyframes dna-parla {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* --- Laboratuvar atmosferi: yavaşça yükselen kabarcıklar --- */
+@keyframes kabarcik-yuksel {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-105vh) scale(1.25);
+    opacity: 0;
+  }
+}
+
+.kabarcik {
+  position: absolute;
+  bottom: -40px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 32% 28%,
+    rgba(153, 246, 228, 0.55),
+    rgba(45, 212, 191, 0.12) 60%,
+    transparent 72%
+  );
+  border: 1px solid rgba(94, 234, 212, 0.22);
+  animation: kabarcik-yuksel linear infinite;
+}
+
+/* --- İnce laboratuvar ızgarası (blueprint hissi) --- */
+.lab-izgara {
+  background-image: linear-gradient(
+      rgba(45, 212, 191, 0.11) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.11) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
 }
 
 /* --- Analiz sonucu belirince yumuşak giriş --- */
@@ -307,6 +366,7 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .dna-serit-asagi,
   .dna-serit-yukari,
+  .kabarcik,
   .parlak-cerceve,
   .deney-ikonu,
   .adim-rozet,
