@@ -1,12 +1,38 @@
+import fs from "fs";
+import path from "path";
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { KanTahliliPdfBelgesi } from "../../lib/kanTahliliPdfBelgesi";
-import { AnalizSonucu } from "../../types/kanTahlili";
+import {
+  KanTahliliPdfBelgesi,
+  FontYollari,
+} from "../../lib/kanTahliliPdfBelgesi";
+import { KanTahliliKlasikBelgesi } from "../../lib/kanTahliliKlasikBelgesi";
+import { AnalizSonucu, SablonTuru } from "../../types/kanTahlili";
 
 // React-PDF, dosya sistemine (font, logo) erişmesi gerektiği için
 // Node.js runtime'ında çalışmalı - Edge runtime'da ÇALIŞMAZ.
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+// Sunucuda font/logo'yu dosya sisteminden mutlak yol olarak veririz.
+// (Tarayıcı önizlemesi ise public URL kullanır - bkz. lib/*.)
+function sunucuFontYollari(): FontYollari {
+  const klasor = path.join(process.cwd(), "public", "fonts");
+  return {
+    regular: path.join(klasor, "Inter-Regular.ttf"),
+    medium: path.join(klasor, "Inter-Medium.ttf"),
+    semibold: path.join(klasor, "Inter-SemiBold.ttf"),
+    bold: path.join(klasor, "Inter-Bold.ttf"),
+  };
+}
+
+function sunucuLogo(): Buffer | null {
+  try {
+    return fs.readFileSync(path.join(process.cwd(), "public", "logoGeropital.png"));
+  } catch {
+    return null;
+  }
+}
 
 function dosyaAdiTemizle(metin: string) {
   return metin
@@ -73,6 +99,7 @@ function sonucuGuvenliHaleGetir(veri: any): AnalizSonucu {
     tedaviNotlari: Array.isArray(veri?.tedaviNotlari) ? veri.tedaviNotlari : [],
     uyariMesaji: veri?.uyariMesaji || "",
     degerlendirenKisi: veri?.degerlendirenKisi || "",
+    ekOgeler: Array.isArray(veri?.ekOgeler) ? veri.ekOgeler : [],
   };
 }
 
@@ -81,6 +108,11 @@ export async function POST(request: Request) {
     const gelenVeri = await request.json();
     const sonuc = sonucuGuvenliHaleGetir(gelenVeri);
 
+    // Şablon türü gövdede "sablon" alanı olarak gelir; geçersiz/eksikse
+    // varsayılan olarak "modern" kullanılır.
+    const sablon: SablonTuru =
+      gelenVeri?.sablon === "klasik" ? "klasik" : "modern";
+
     if (sonuc.parametreler.length === 0) {
       return NextResponse.json(
         { hata: "PDF oluşturmak için en az bir parametre gerekli." },
@@ -88,9 +120,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const pdfBuffer = await renderToBuffer(
-      KanTahliliPdfBelgesi({ sonuc }) as any
-    );
+    const fontYollari = sunucuFontYollari();
+    const logo = sunucuLogo();
+
+    const belge =
+      sablon === "klasik"
+        ? KanTahliliKlasikBelgesi({ sonuc, fontYollari, logo })
+        : KanTahliliPdfBelgesi({ sonuc, fontYollari, logo });
+
+    const pdfBuffer = await renderToBuffer(belge as any);
 
     const dosyaAdi = pdfDosyaAdiOlustur(sonuc);
 

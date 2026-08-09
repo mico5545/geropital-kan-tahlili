@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import {
   Document,
   Page,
@@ -19,6 +17,7 @@ import {
   KATEGORI_RENK,
   KategoriIkonTuru,
   Parametre,
+  RaporOgesi,
   kategoriIkonTuruBelirle,
   kategorilereGoreGrupla,
 } from "../types/kanTahlili";
@@ -28,21 +27,28 @@ import {
 // ----------------------------------------------------------------------
 // React-PDF'in yerleşik fontları (Helvetica vb.) Türkçe karakterleri
 // (ğ, ş, ı, İ, ö, ç) doğru basamaz - bu yüzden gerçek bir TTF font
-// gömüyoruz. Font dosyaları /public/fonts/ altında olmalı.
+// gömüyoruz.
+//
+// ÖNEMLİ: Bu şablon HEM sunucuda (indirme için) HEM tarayıcıda (canlı
+// önizleme için) çalışır. Bu yüzden font/logo kaynağını doğrudan burada
+// dosya sisteminden okumuyoruz (fs/path tarayıcıda çalışmaz). Bunun
+// yerine font URL'leri ile Image kaynağı DIŞARIDAN parametre olarak
+// veriliyor:
+//   - Sunucu tarafı: /public/fonts altındaki dosyaları okuyup data-URI
+//     veya mutlak dosya yolu olarak verir (bkz. api/kan-tahlili-pdf).
+//   - Tarayıcı tarafı: /fonts/Inter-Regular.ttf gibi public URL'leri verir.
 let fontlarKayitliMi = false;
 
-function fontlariKaydet() {
+function fontlariKaydet(fontYollari: FontYollari) {
   if (fontlarKayitliMi) return;
-
-  const klasor = path.join(process.cwd(), "public", "fonts");
 
   Font.register({
     family: "Inter",
     fonts: [
-      { src: path.join(klasor, "Inter-Regular.ttf"), fontWeight: 400 },
-      { src: path.join(klasor, "Inter-Medium.ttf"), fontWeight: 500 },
-      { src: path.join(klasor, "Inter-SemiBold.ttf"), fontWeight: 600 },
-      { src: path.join(klasor, "Inter-Bold.ttf"), fontWeight: 700 },
+      { src: fontYollari.regular, fontWeight: 400 },
+      { src: fontYollari.medium, fontWeight: 500 },
+      { src: fontYollari.semibold, fontWeight: 600 },
+      { src: fontYollari.bold, fontWeight: 700 },
     ],
   });
 
@@ -51,24 +57,23 @@ function fontlariKaydet() {
   fontlarKayitliMi = true;
 }
 
-// ----------------------------------------------------------------------
-// LOGO
-// ----------------------------------------------------------------------
-let logoBuffer: Buffer | null | undefined;
+export type FontYollari = {
+  regular: string;
+  medium: string;
+  semibold: string;
+  bold: string;
+};
 
-function logoyuYukle(): Buffer | null {
-  if (logoBuffer !== undefined) return logoBuffer;
+// Tarayıcıda kullanılacak public URL'ler. Sunucu tarafı kendi yollarını
+// ayrıca verir.
+export const TARAYICI_FONT_YOLLARI: FontYollari = {
+  regular: "/fonts/Inter-Regular.ttf",
+  medium: "/fonts/Inter-Medium.ttf",
+  semibold: "/fonts/Inter-SemiBold.ttf",
+  bold: "/fonts/Inter-Bold.ttf",
+};
 
-  try {
-    logoBuffer = fs.readFileSync(
-      path.join(process.cwd(), "public", "logoGeropital.png")
-    );
-  } catch {
-    logoBuffer = null;
-  }
-
-  return logoBuffer;
-}
+export const TARAYICI_LOGO = "/logoGeropital.png";
 
 // ----------------------------------------------------------------------
 // RENKLER
@@ -326,7 +331,183 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   footerMetin: { color: RENK.gri, fontSize: 6.8 },
+
+  // --- Editörden gelen ekstra öğeler ---
+  ogeBaslik: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: RENK.lacivert,
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  ogeParagraf: {
+    fontSize: 9.4,
+    color: RENK.griMetin,
+    lineHeight: 1.5,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  ogeVurgu: {
+    marginTop: 8,
+    marginBottom: 4,
+    padding: 9,
+    borderRadius: 6,
+    borderLeftWidth: 3,
+  },
+  ogeVurguBaslik: { fontSize: 9.6, fontWeight: 700, marginBottom: 3 },
+  ogeVurguMetin: { fontSize: 9, lineHeight: 1.45 },
+  ogeListeMadde: {
+    fontSize: 9.2,
+    color: RENK.griMetin,
+    lineHeight: 1.4,
+    marginBottom: 3,
+    marginLeft: 4,
+  },
+  ogeAyrac: {
+    marginVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: RENK.griBorder,
+  },
+  cubukKutu: { marginTop: 8, marginBottom: 6 },
+  cubukBaslikSatiri: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  cubukBaslik: { fontSize: 9.4, fontWeight: 700, color: RENK.lacivert },
+  cubukDeger: { fontSize: 9.4, fontWeight: 700 },
+  cubukRay: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#e8eef2",
+    position: "relative",
+  },
+  cubukIsaret: {
+    position: "absolute",
+    top: -2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#ffffff",
+  },
+  cubukEtiketSatiri: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 3,
+  },
+  cubukEtiket: { fontSize: 6.6, color: RENK.gri },
 });
+
+const VURGU_RENK: Record<string, { bg: string; border: string; metin: string }> = {
+  bilgi: { bg: "#eff6ff", border: "#3b82f6", metin: "#1e40af" },
+  basari: { bg: "#ecfdf5", border: "#10b981", metin: "#065f46" },
+  uyari: { bg: "#fffbeb", border: "#f59e0b", metin: "#92400e" },
+  tehlike: { bg: "#fef2f2", border: "#ef4444", metin: "#991b1b" },
+};
+
+function cubukRenk(durum?: string) {
+  if (durum === "kritik") return "#dc2626";
+  if (durum === "yuksek") return "#ea580c";
+  if (durum === "dusuk") return "#0284c7";
+  return "#059669";
+}
+
+// Editörde eklenen ekstra öğeleri PDF'e basar.
+function EkOgeler({ ogeler }: { ogeler: RaporOgesi[] }) {
+  if (!ogeler || ogeler.length === 0) return null;
+
+  return (
+    <View style={{ marginTop: 6 }}>
+      {ogeler.map((oge) => {
+        if (oge.tur === "baslik") {
+          return (
+            <Text key={oge.id} style={styles.ogeBaslik} wrap={false}>
+              {oge.baslik}
+            </Text>
+          );
+        }
+
+        if (oge.tur === "paragraf") {
+          return (
+            <Text key={oge.id} style={styles.ogeParagraf}>
+              {oge.metin}
+            </Text>
+          );
+        }
+
+        if (oge.tur === "vurgu") {
+          const renk = VURGU_RENK[oge.vurguRengi || "bilgi"];
+          return (
+            <View
+              key={oge.id}
+              style={[
+                styles.ogeVurgu,
+                { backgroundColor: renk.bg, borderLeftColor: renk.border },
+              ]}
+              wrap={false}
+            >
+              {oge.baslik ? (
+                <Text style={[styles.ogeVurguBaslik, { color: renk.metin }]}>
+                  {oge.baslik}
+                </Text>
+              ) : null}
+              <Text style={[styles.ogeVurguMetin, { color: renk.metin }]}>
+                {oge.metin}
+              </Text>
+            </View>
+          );
+        }
+
+        if (oge.tur === "liste") {
+          return (
+            <View key={oge.id} style={{ marginTop: 4, marginBottom: 4 }} wrap={false}>
+              {(oge.maddeler || []).map((madde, i) => (
+                <Text key={i} style={styles.ogeListeMadde}>
+                  • {madde}
+                </Text>
+              ))}
+            </View>
+          );
+        }
+
+        if (oge.tur === "cubuk") {
+          const yuzde = Math.max(0, Math.min(100, oge.cubukYuzde ?? 50));
+          const renk = cubukRenk(oge.cubukDurum);
+          return (
+            <View key={oge.id} style={styles.cubukKutu} wrap={false}>
+              <View style={styles.cubukBaslikSatiri}>
+                <Text style={styles.cubukBaslik}>{oge.baslik}</Text>
+                <Text style={[styles.cubukDeger, { color: renk }]}>
+                  {oge.cubukDeger}
+                </Text>
+              </View>
+              <View style={styles.cubukRay}>
+                <View
+                  style={[
+                    styles.cubukIsaret,
+                    { left: `${yuzde}%`, marginLeft: -6, backgroundColor: renk },
+                  ]}
+                />
+              </View>
+              <View style={styles.cubukEtiketSatiri}>
+                <Text style={styles.cubukEtiket}>Düşük</Text>
+                <Text style={styles.cubukEtiket}>Normal</Text>
+                <Text style={styles.cubukEtiket}>Yüksek</Text>
+              </View>
+            </View>
+          );
+        }
+
+        if (oge.tur === "ayrac") {
+          return <View key={oge.id} style={styles.ogeAyrac} />;
+        }
+
+        return null;
+      })}
+    </View>
+  );
+}
 
 function durumRozetStil(durum: Parametre["durum"]) {
   const renkler = DURUM_RENK[durum];
@@ -397,6 +578,23 @@ function IkonGövde({ tur }: { tur: KategoriIkonTuru }) {
       );
     case "erlen":
       return <Polygon points="6,1.5 10,1.5 10,5.5 14,14.5 2,14.5 6,5.5" fill={beyaz} />;
+    case "kalp":
+      return (
+        <Polygon
+          points="8,14 2.5,8.5 2.5,5 5,3 8,5 11,3 13.5,5 13.5,8.5"
+          fill={beyaz}
+        />
+      );
+    case "bolt":
+      return <Polygon points="9,1 3.5,9 7.5,9 6.5,15 12.5,7 8.5,7" fill={beyaz} />;
+    case "tiroid":
+      return (
+        <>
+          <Circle cx={5.5} cy={9} r={3.2} fill={beyaz} />
+          <Circle cx={10.5} cy={9} r={3.2} fill={beyaz} />
+          <Line x1={8} y1={6} x2={8} y2={9} stroke={beyaz} strokeWidth={1.4} />
+        </>
+      );
     default:
       return (
         <>
@@ -493,10 +691,17 @@ function Footer() {
 // ----------------------------------------------------------------------
 // ANA BELGE
 // ----------------------------------------------------------------------
-export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
-  fontlariKaydet();
+export function KanTahliliPdfBelgesi({
+  sonuc,
+  fontYollari = TARAYICI_FONT_YOLLARI,
+  logo,
+}: {
+  sonuc: AnalizSonucu;
+  fontYollari?: FontYollari;
+  logo?: string | Buffer | null;
+}) {
+  fontlariKaydet(fontYollari);
 
-  const logo = logoyuYukle();
   const gruplar = kategorilereGoreGrupla(sonuc.parametreler || []);
   const bugun = new Date().toLocaleDateString("tr-TR");
 
@@ -686,6 +891,9 @@ export function KanTahliliPdfBelgesi({ sonuc }: { sonuc: AnalizSonucu }) {
             <Text style={[styles.h2, { marginBottom: 6 }]}>Uyarı</Text>
             <Text style={styles.notMadde}>{sonuc.uyariMesaji}</Text>
           </View>
+
+          {/* Editörde eklenen ekstra öğeler */}
+          <EkOgeler ogeler={sonuc.ekOgeler || []} />
 
           {sonuc.degerlendirenKisi ? (
             <Text style={styles.degerlendirenSatiri}>

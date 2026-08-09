@@ -10,6 +10,19 @@ import {
   Parametre,
   kategoriIkonTuruBelirle,
 } from "./types/kanTahlili";
+import RaporEditoru from "./RaporEditoru";
+import dynamic from "next/dynamic";
+
+// PDFViewer yalnızca tarayıcıda çalışır (sunucuda render edilemez), bu
+// yüzden canlı önizlemeyi ssr:false ile dinamik yüklüyoruz.
+const CanliOnizleme = dynamic(() => import("./CanliOnizleme"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[620px] items-center justify-center rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/40 text-sm text-slate-400">
+      Önizleme hazırlanıyor...
+    </div>
+  ),
+});
 
 type FiltreDurumu = "tum" | Durum;
 
@@ -308,6 +321,23 @@ function KategoriIkonGovdesi({ tur }: { tur: KategoriIkonTuru }) {
       );
     case "erlen":
       return <polygon points="6,1.5 10,1.5 10,5.5 14,14.5 2,14.5 6,5.5" fill={beyaz} />;
+    case "kalp":
+      return (
+        <polygon
+          points="8,14 2.5,8.5 2.5,5 5,3 8,5 11,3 13.5,5 13.5,8.5"
+          fill={beyaz}
+        />
+      );
+    case "bolt":
+      return <polygon points="9,1 3.5,9 7.5,9 6.5,15 12.5,7 8.5,7" fill={beyaz} />;
+    case "tiroid":
+      return (
+        <>
+          <circle cx={5.5} cy={9} r={3.2} fill={beyaz} />
+          <circle cx={10.5} cy={9} r={3.2} fill={beyaz} />
+          <line x1={8} y1={6} x2={8} y2={9} stroke={beyaz} strokeWidth={1.4} />
+        </>
+      );
     default:
       return (
         <>
@@ -344,14 +374,14 @@ export default function AnaSayfa() {
   const [hataAnahtari, setHataAnahtari] = useState(0);
   const [arama, setArama] = useState("");
   const [durumFiltresi, setDurumFiltresi] = useState<FiltreDurumu>("tum");
-  const [geciciApiKey, setGeciciApiKey] = useState("");
-  const [isUpdatingApiKey, setIsUpdatingApiKey] = useState(false);
   const [tema, setTema] = useState<"koyu" | "acik">("koyu");
   const [buyukYazi, setBuyukYazi] = useState(false);
   const [surukleniyorMu, setSurukleniyorMu] = useState(false);
   const [analizAsamasi, setAnalizAsamasi] = useState(0);
   const [pdfBasariToastu, setPdfBasariToastu] = useState(false);
   const [whatsappTelefon, setWhatsappTelefon] = useState("");
+  const [sablon, setSablon] = useState<"modern" | "klasik">("modern");
+  const [editorAcik, setEditorAcik] = useState(false);
 
   // Tema ve büyük-yazı tercihini tarayıcıya kaydet, sayfa açılışında geri
   // yükle. Bu bir Next.js "artifact"i değil, kullanıcının kendi
@@ -451,7 +481,6 @@ export default function AnaSayfa() {
 
       const cevap = await fetch("/api/kan-tahlili-analiz", {
         method: "POST",
-        headers: geciciApiKey ? { "x-gemini-api-key": geciciApiKey } : undefined,
         body: formData,
       });
 
@@ -486,7 +515,6 @@ export default function AnaSayfa() {
     } finally {
       clearTimeout(asama2Zamanlayici);
       setYukleniyor(false);
-      setIsUpdatingApiKey(false);
       setAnalizAsamasi(0);
     }
   }
@@ -504,7 +532,7 @@ export default function AnaSayfa() {
       const cevap = await fetch("/api/kan-tahlili-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sonuc),
+        body: JSON.stringify({ ...sonuc, sablon }),
       });
 
       if (!cevap.ok) {
@@ -606,8 +634,8 @@ export default function AnaSayfa() {
 
   return (
     <main className="relative min-h-screen bg-slate-50 dark:bg-[#06131a] text-slate-900 dark:text-white">
-      <DnaArkaplan aktif={!yukleniyor && !isUpdatingApiKey} />
-      {(yukleniyor || isUpdatingApiKey) && (
+      <DnaArkaplan aktif={!yukleniyor} />
+      {yukleniyor && (
         <div className="analiz-yukleniyor-kaplama">
           <div className="analiz-yukleniyor-kart">
             <img
@@ -619,27 +647,23 @@ export default function AnaSayfa() {
             <div className="daktilo-yazi">GEROPITAL</div>
 
             <p>
-              {isUpdatingApiKey
-                ? "API Anahtarı Güncelleniyor..."
-                : analizAsamasi >= 2
+              {analizAsamasi >= 2
                 ? "Gemini'ye gönderiliyor ve sonuçlar işleniyor..."
                 : "PDF okunuyor..."}
             </p>
 
-            {!isUpdatingApiKey && (
-              <div className="flex items-center gap-2">
-                {["PDF Okuma", "Gemini Analizi", "Sonuçlar"].map((asama, index) => (
-                  <div key={asama} className="flex items-center gap-2">
-                    <div
-                      className={`h-2 w-2 rounded-full transition-colors ${
-                        analizAsamasi > index ? "bg-cyan-400" : "bg-white/20"
-                      }`}
-                    />
-                    {index < 2 && <div className="h-px w-6 bg-white/15" />}
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {["PDF Okuma", "Gemini Analizi", "Sonuçlar"].map((asama, index) => (
+                <div key={asama} className="flex items-center gap-2">
+                  <div
+                    className={`h-2 w-2 rounded-full transition-colors ${
+                      analizAsamasi > index ? "bg-cyan-400" : "bg-white/20"
+                    }`}
+                  />
+                  {index < 2 && <div className="h-px w-6 bg-white/15" />}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -783,43 +807,6 @@ export default function AnaSayfa() {
 
             <div className="space-y-5">
               <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 backdrop-blur-md">
-                <h3 className="mb-3 text-lg font-semibold">API Anahtarı</h3>
-
-                <p className="mb-4 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Kota dolarsa geçici Gemini API anahtarını buraya girerek analize devam edebilirsiniz.
-                </p>
-
-                <div className="flex gap-3">
-                  <input
-                    type="password"
-                    value={geciciApiKey}
-                    onChange={(event) => setGeciciApiKey(event.target.value)}
-                    placeholder="Geçici Gemini API anahtarı"
-                    className="flex-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/50 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-500 focus:border-cyan-300/40 focus-halka"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!geciciApiKey.trim()) {
-                        setHata("Lütfen bir API anahtarı girin.");
-                        return;
-                      }
-                      if (!dosya) {
-                        setHata("Lütfen bir PDF dosyası seçin.");
-                        return;
-                      }
-                      setIsUpdatingApiKey(true);
-                      analiziBaslat();
-                    }}
-                    disabled={yukleniyor || isUpdatingApiKey || !geciciApiKey.trim()}
-                    className="rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-3 font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-600 hover:to-cyan-700"
-                  >
-                    {isUpdatingApiKey ? "Güncelleniyor..." : yukleniyor ? "Analiz Ediliyor..." : "Bağlan"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 backdrop-blur-md">
                 <h3 className="mb-5 text-lg font-semibold">Analiz Akışı</h3>
 
                 <div className="relative space-y-6 pl-2">
@@ -867,12 +854,41 @@ export default function AnaSayfa() {
                   <h2 className="mt-1 text-3xl font-bold">
                     Kan Tahlili Klinik Ön Değerlendirmesi
                   </h2>
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    Rapor formatı:{" "}
-                    <span className="font-semibold text-cyan-700 dark:text-cyan-200">
-                      Kompakt Klinik Rapor
-                    </span>
-                  </p>
+
+                  <div className="mt-3">
+                    <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                      PDF Şablonu
+                    </p>
+                    <div className="inline-flex rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-950/50 p-1">
+                      <button
+                        type="button"
+                        onClick={() => setSablon("modern")}
+                        className={`focus-halka rounded-xl px-4 py-2 text-sm font-medium transition ${
+                          sablon === "modern"
+                            ? "bg-cyan-400 text-slate-950"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Modern (Tablolu)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSablon("klasik")}
+                        className={`focus-halka rounded-xl px-4 py-2 text-sm font-medium transition ${
+                          sablon === "klasik"
+                            ? "bg-cyan-400 text-slate-950"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Klasik (Resmi Rapor)
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                      {sablon === "modern"
+                        ? "İkonlu, renkli, tablo düzeninde kurumsal rapor."
+                        : "Antetli, numaralı başlıklı, madde madde resmi Geropital formatı."}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
@@ -1072,6 +1088,76 @@ export default function AnaSayfa() {
                   placeholder="Örn. Hem. Ayşe Yılmaz"
                   className="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/50 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-500 focus:border-cyan-300/40 focus-halka"
                 />
+              </div>
+
+              {/* --- Gelişmiş Rapor Editörü (katlanabilir) --- */}
+              <div className="mb-6 rounded-2xl border border-cyan-300/30 dark:border-cyan-400/20 bg-cyan-50/50 dark:bg-cyan-400/5">
+                <button
+                  onClick={() => setEditorAcik((a) => !a)}
+                  className="focus-halka flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+                >
+                  <span>
+                    <span className="flex items-center gap-2 text-base font-semibold text-cyan-700 dark:text-cyan-100">
+                      <span className="text-lg">🧬</span> Gelişmiş Rapor Editörü
+                    </span>
+                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                      Parametreleri tek tek düzenleyin, satır ekleyin/silin, rapora
+                      başlık, not, vurgu kutusu, değer çubuğu ve liste ekleyin.
+                    </span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-cyan-400/20 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:text-cyan-200">
+                    {editorAcik ? "Kapat ▲" : "Aç ▼"}
+                  </span>
+                </button>
+
+                {editorAcik && (
+                  <div className="border-t border-cyan-300/30 dark:border-cyan-400/20 p-5">
+                    <div className="grid gap-6 xl:grid-cols-2">
+                      {/* SOL: düzenleme araçları */}
+                      <div className="min-w-0">
+                        <RaporEditoru sonuc={sonuc} setSonuc={setSonuc} />
+                      </div>
+
+                      {/* SAĞ: canlı PDF önizleme */}
+                      <div className="min-w-0">
+                        <div className="xl:sticky xl:top-4">
+                          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-100">
+                                Canlı Önizleme
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {sablon === "modern"
+                                  ? "Modern (Tablolu) şablon"
+                                  : "Klasik (Resmi Rapor) şablon"}{" "}
+                                · indireceğiniz PDF ile birebir aynı
+                              </p>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <button
+                                onClick={pdfOlustur}
+                                disabled={pdfHazirlaniyor}
+                                className="focus-halka rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {pdfHazirlaniyor ? "Hazırlanıyor..." : "PDF İndir"}
+                              </button>
+                              <button
+                                onClick={whatsaptanGonder}
+                                title="Önce PDF İndir'e basın, sonra açılan WhatsApp sohbetine ekleyin"
+                                className="focus-halka rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-500/25"
+                              >
+                                WhatsApp
+                              </button>
+                            </div>
+                          </div>
+
+                          <CanliOnizleme sonuc={sonuc} sablon={sablon} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mb-6 flex flex-col gap-3 md:flex-row">

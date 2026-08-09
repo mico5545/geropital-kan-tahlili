@@ -10,6 +10,12 @@
 
 export type Durum = "normal" | "dusuk" | "yuksek" | "kritik";
 
+// Hangi PDF şablonuyla çıktı alınacağını belirler.
+// "modern": React-PDF ile kurumsal, ikonlu, tablolu tasarım (varsayılan).
+// "klasik": Geropital'in mevcut resmi rapor formatı - numaralı başlıklar
+//            (1. KAN SAYIMI...), madde madde açıklamalar, "Yorum:" blokları.
+export type SablonTuru = "modern" | "klasik";
+
 export type HastaBilgisi = {
   adSoyad: string;
   tcKimlik: string;
@@ -36,6 +42,35 @@ export type Parametre = {
   yorum: string;
 };
 
+// --- EDİTÖR ÖĞELERİ ---
+// Editör sayfasında personelin rapora elle ekleyebileceği ekstra bloklar.
+// Bunlar analizden gelmez; kullanıcı "öğe ekle" butonlarıyla oluşturur ve
+// PDF'in sonuna (notlar bölümüne) sırayla basılır.
+export type OgeTuru =
+  | "baslik" // Bir alt başlık / bölüm ayracı
+  | "paragraf" // Serbest metin paragrafı
+  | "vurgu" // Renkli vurgu kutusu (bilgi/uyarı/başarı/tehlike)
+  | "liste" // Madde işaretli liste
+  | "cubuk" // Tek bir parametrenin referans-konum çubuğu (görsel)
+  | "ayrac"; // İnce yatay çizgi
+
+export type VurguRengi = "bilgi" | "uyari" | "basari" | "tehlike";
+
+export type RaporOgesi = {
+  id: string;
+  tur: OgeTuru;
+  // Kullanılan alanlar öğe türüne göre değişir; hepsi opsiyonel.
+  baslik?: string; // baslik, vurgu, cubuk
+  metin?: string; // paragraf, vurgu
+  maddeler?: string[]; // liste
+  vurguRengi?: VurguRengi; // vurgu
+  // "cubuk" için: değerin referans bandındaki konumu (0-100 arası),
+  // ve gösterilecek sayısal değer/etiket.
+  cubukDeger?: string;
+  cubukYuzde?: number; // 0-100
+  cubukDurum?: Durum;
+};
+
 export type AnalizSonucu = {
   hastaBilgisi: HastaBilgisi;
   ozet: Ozet;
@@ -46,29 +81,46 @@ export type AnalizSonucu = {
   // Raporu düzenleyen/onaylayan personel - admin panelinde elle girilir,
   // Gemini bu alanı doldurmaz. Opsiyonel: eski kayıtlarla uyumlu olsun diye.
   degerlendirenKisi?: string;
+  // Editörde eklenen ekstra bloklar (opsiyonel; eski kayıtlarla uyumlu).
+  ekOgeler?: RaporOgesi[];
 };
 
 // PDF'te kategori başlığının yanına çizilecek küçük sembol için hangi
 // ikon ailesinin kullanılacağını belirler (bkz. kanTahliliPdfBelgesi.tsx).
 export type KategoriIkonTuru =
-  | "damla"
-  | "molekul"
-  | "huni"
-  | "kalkan"
-  | "hedef"
-  | "gunes"
-  | "erlen"
+  | "damla" // Hemogram / Kan Sayımı
+  | "molekul" // Karaciğer
+  | "huni" // Böbrek
+  | "kalkan" // İnflamasyon / Enfeksiyon
+  | "hedef" // Tümör Belirteçleri
+  | "gunes" // Vitamin
+  | "erlen" // Biyokimya
+  | "kalp" // Yağ Metabolizması / Lipid
+  | "bolt" // Elektrolit / Mineral
+  | "tiroid" // Tiroid Hormonları
   | "diger";
 
 export function kategoriIkonTuruBelirle(kategori: string): KategoriIkonTuru {
   const k = (kategori || "").toLowerCase();
 
-  if (k.includes("hemogram")) return "damla";
+  if (k.includes("hemogram") || k.includes("kan sayım")) return "damla";
   if (k.includes("karaciğer") || k.includes("karaciger")) return "molekul";
   if (k.includes("böbrek") || k.includes("bobrek")) return "huni";
-  if (k.includes("enfeksiyon")) return "kalkan";
-  if (k.includes("tümör") || k.includes("tumor")) return "hedef";
+  if (k.includes("inflamasyon") || k.includes("enfeksiyon") || k.includes("crp"))
+    return "kalkan";
+  if (k.includes("tümör") || k.includes("tumor") || k.includes("kanser"))
+    return "hedef";
   if (k.includes("vitamin")) return "gunes";
+  if (k.includes("yağ") || k.includes("yag") || k.includes("lipid") || k.includes("kolesterol"))
+    return "kalp";
+  if (
+    k.includes("elektrolit") ||
+    k.includes("mineral") ||
+    k.includes("sodyum") ||
+    k.includes("potasyum")
+  )
+    return "bolt";
+  if (k.includes("tiroid") || k.includes("tsh")) return "tiroid";
   if (k.includes("biyokimya")) return "erlen";
 
   return "diger";
@@ -84,6 +136,9 @@ export const KATEGORI_RENK: Record<KategoriIkonTuru, string> = {
   hedef: "#db2777",
   gunes: "#ca8a04",
   erlen: "#0097a7",
+  kalp: "#e11d48",
+  bolt: "#0891b2",
+  tiroid: "#7c3aed",
   diger: "#64748b",
 };
 
