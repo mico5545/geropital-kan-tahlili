@@ -409,12 +409,6 @@ export default function AnaSayfa() {
     window.localStorage.setItem("geropital-buyuk-yazi", buyukYazi ? "1" : "0");
   }, [buyukYazi]);
 
-  // Hata mesajı her yeni gösterildiğinde "sallanma" animasyonunun tekrar
-  // tetiklenmesi için bir anahtar (key) değiştiriyoruz.
-  useEffect(() => {
-    if (hata) setHataAnahtari((k) => k + 1);
-  }, [hata]);
-
   // PDF başarıyla indiğinde kısa süreliğine görünen onay toast'ı.
   useEffect(() => {
     if (!pdfBasariToastu) return;
@@ -422,12 +416,20 @@ export default function AnaSayfa() {
     return () => clearTimeout(zamanlayici);
   }, [pdfBasariToastu]);
 
+  // Hata mesajını gösterirken hem metni ayarlar hem de "sallanma"
+  // animasyonunun tekrar tetiklenmesi için anahtarı artırır. Böylece
+  // useEffect içinde setState çağırma anti-pattern'ine gerek kalmaz.
+  function hataGoster(mesaj: string) {
+    setHata(mesaj);
+    if (mesaj) setHataAnahtari((k) => k + 1);
+  }
+
   // Hem "PDF Seç" ile hem sürükle-bırak ile gelen dosya için ortak mantık.
   function dosyaAyarla(secilenDosya: File | null | undefined) {
     if (!secilenDosya) return;
 
     if (secilenDosya.type !== "application/pdf") {
-      setHata("Lütfen yalnızca PDF dosyası yükleyin.");
+      hataGoster("Lütfen yalnızca PDF dosyası yükleyin.");
       return;
     }
 
@@ -460,7 +462,7 @@ export default function AnaSayfa() {
 
   async function analiziBaslat() {
     if (!dosya) {
-      setHata("Lütfen önce bir PDF dosyası seçin.");
+      hataGoster("Lütfen önce bir PDF dosyası seçin.");
       return;
     }
 
@@ -511,7 +513,7 @@ export default function AnaSayfa() {
       setAnalizAsamasi(3);
       setSonuc(veri);
     } catch (error: any) {
-      setHata(error.message || "Beklenmeyen bir hata oluştu.");
+      hataGoster(error.message || "Beklenmeyen bir hata oluştu.");
     } finally {
       clearTimeout(asama2Zamanlayici);
       setYukleniyor(false);
@@ -556,7 +558,7 @@ export default function AnaSayfa() {
       window.URL.revokeObjectURL(url);
       setPdfBasariToastu(true);
     } catch (error: any) {
-      setHata(error.message || "PDF oluşturulurken bir hata oluştu.");
+      hataGoster(error.message || "PDF oluşturulurken bir hata oluştu.");
     } finally {
       setPdfHazirlaniyor(false);
     }
@@ -1112,15 +1114,15 @@ export default function AnaSayfa() {
 
                 {editorAcik && (
                   <div className="border-t border-cyan-300/30 dark:border-cyan-400/20 p-5">
-                    <div className="grid gap-6 xl:grid-cols-2">
-                      {/* SOL: düzenleme araçları */}
-                      <div className="min-w-0">
+                    <div className="grid gap-6 lg:grid-cols-[minmax(300px,380px)_1fr]">
+                      {/* SOL: dar, kaydırılabilir düzenleme paneli */}
+                      <div className="min-w-0 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:pr-2">
                         <RaporEditoru sonuc={sonuc} setSonuc={setSonuc} />
                       </div>
 
-                      {/* SAĞ: canlı PDF önizleme */}
+                      {/* SAĞ: büyük, baskın canlı önizleme */}
                       <div className="min-w-0">
-                        <div className="xl:sticky xl:top-4">
+                        <div className="lg:sticky lg:top-4">
                           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                             <div>
                               <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-100">
@@ -1152,7 +1154,9 @@ export default function AnaSayfa() {
                             </div>
                           </div>
 
-                          <CanliOnizleme sonuc={sonuc} sablon={sablon} />
+                          <div className="h-[calc(100vh-160px)] min-h-[640px]">
+                            <CanliOnizleme sonuc={sonuc} sablon={sablon} />
+                          </div>
                         </div>
                       </div>
                     </div>

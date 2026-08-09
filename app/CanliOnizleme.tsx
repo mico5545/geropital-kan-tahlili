@@ -56,7 +56,7 @@ export default function CanliOnizleme({
       <PDFViewer
         showToolbar
         className="h-full w-full rounded-2xl border border-slate-200 dark:border-white/10"
-        style={{ minHeight: 620 }}
+        style={{ minHeight: "100%" }}
       >
         {belge as any}
       </PDFViewer>
